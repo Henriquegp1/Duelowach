@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Rajdhani } from "next/font/google";
 import "./globals.css";
+import BgFx from "@/components/BgFx";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,15 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} ${rajdhani.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-fg">{children}</body>
+      <body className="min-h-full flex flex-col bg-background text-fg">
+        <BgFx />
+        
+        {/* Camada do conteúdo: Fica na frente do fundo! */}
+        <div className="relative z-10 flex-1 w-full">
+          {children}
+        </div>
+
+      </body>
     </html>
   );
 }

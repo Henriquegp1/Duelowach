@@ -125,3 +125,66 @@ body {
   animation: ow-shimmer 1.4s linear infinite;
   border-radius: 8px;
 }
+
+/* --- FUNDO OVERWATCH ESTILO V4 (FINAL) --- */
+
+/* 1. O 'X' GORDINHO */
+.bg-fx-x {
+  position: absolute;
+  width: 200px;  
+  height: 200px;
+  opacity: 0.6; 
+}
+
+.bg-fx-x::before,
+.bg-fx-x::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140%;
+  height: 85px; 
+  background: #161D27; 
+  transform-origin: center;
+}
+
+.bg-fx-x::before { transform: translate(-50%, -50%) rotate(45deg); }
+.bg-fx-x::after  { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* Posições dos X */
+.bg-fx-x-1 {
+  top: 8%;
+  left: 6%;
+  transform: scale(1.6); 
+}
+
+.bg-fx-x-2 {
+  bottom: 15%;
+  right: 15%; /* Afastei um pouco da direita para não brigar com o traço */
+  transform: rotate(15deg); 
+}
+
+/* 2. O TRIÂNGULO */
+.bg-fx-triangle {
+  position: absolute;
+  top: 35%;
+  left: 11%;
+  width: 180px;
+  height: 180px;
+  background: #161D27;
+  opacity: 0.6;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  transform: rotate(-20deg); 
+}
+
+/* 3. a linha */
+.bg-fx-linha {
+  position: absolute;
+  top: 30%;
+  left: 30%; /* Ajuste esses valores de top e left para posicionar exatamente onde quer */
+  width: 70px;  /* A espessura da barra */
+  height: 300px; /* O comprimento da barra */
+  background: #161D27;
+  opacity: 0.6;
+  transform: rotate(45deg); /* Inclinação no mesmo ângulo da sua imagem */
+}
