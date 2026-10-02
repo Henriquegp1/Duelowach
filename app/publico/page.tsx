@@ -106,10 +106,12 @@ interface MatchItem {
   fase: string;
   timeA: string;
   mainA?: string;
+  battletagA?: string;
   plataformaA?: string;
   scoreA: string;
   timeB: string;
   mainB?: string;
+  battletagB?: string;
   plataformaB?: string;
   scoreB: string;
   vencedor: string;
@@ -168,6 +170,45 @@ function parseHorarioToMinutes(horarioStr: string): number {
   return dayVal;
 }
 
+function CountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
+
+  useEffect(() => {
+    const targetDate = new Date("2026-10-02T19:30:00").getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const difference = targetDate - now;
+
+      if (difference > 0) {
+        const dias = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const horas = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutos = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const segundos = Math.floor((difference % (1000 * 60)) / 1000);
+        setTimeLeft({ dias, horas, minutos, segundos });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex justify-center gap-3 md:gap-4 my-4">
+      {[
+        { label: "Dias", val: timeLeft.dias },
+        { label: "Horas", val: timeLeft.horas },
+        { label: "Minutos", val: timeLeft.minutos },
+        { label: "Segundos", val: timeLeft.segundos },
+      ].map((item, idx) => (
+        <div key={idx} className="surface-card px-4 py-3 rounded-2xl border border-ow-orange/40 bg-surface-2 text-center min-w-[70px] shadow-lg">
+          <span className="text-display text-2xl md:text-3xl font-bold text-ow-orange tabular-nums block">{String(item.val).padStart(2, "0")}</span>
+          <span className="text-[10px] text-fg-dim uppercase tracking-widest">{item.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function CardConfronto({ m }: { m: MatchItem }) {
   const concluida = m.status === "concluida" || m.vencedor !== "";
   const isBye = m.timeB === "BYE";
@@ -189,10 +230,15 @@ function CardConfronto({ m }: { m: MatchItem }) {
         {/* Competidores / Placar */}
         <div className="flex-1 flex flex-col">
           {/* Jogador A */}
-          <div className={`flex items-center justify-between px-5 py-4
-            ${concluida && m.vencedor === m.timeA ? "bg-success/15" : ""}
-            ${concluida && m.vencedor !== m.timeA && m.vencedor !== "" && !isBye ? "opacity-40" : ""}
-          `}>
+          <div
+            data-player={m.timeA}
+            data-bt={m.battletagA}
+            data-plat={m.plataformaA}
+            className={`flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
+              ${concluida && m.vencedor === m.timeA ? "bg-success/15" : ""}
+              ${concluida && m.vencedor !== m.timeA && m.vencedor !== "" && !isBye ? "opacity-40" : ""}
+            `}
+          >
             <div className="flex items-center gap-4 truncate">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-background shrink-0 shadow-md"
@@ -201,7 +247,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
                 {m.timeA ? m.timeA.substring(0, 2).toUpperCase() : "—"}
               </div>
               <div className="truncate space-y-0.5">
-                <span className={`text-base font-bold uppercase tracking-wide block truncate ${concluida && m.vencedor === m.timeA ? "text-success" : "text-fg"}`}>
+                <span className={`text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && m.vencedor === m.timeA ? "text-success" : "text-fg"}`}>
                   {m.timeA || "A definir"}
                 </span>
                 {m.mainA && m.mainA !== "-" ? (
@@ -223,10 +269,15 @@ function CardConfronto({ m }: { m: MatchItem }) {
               <span className="text-sm text-fg-dim italic">BYE — passa automaticamente</span>
             </div>
           ) : (
-            <div className={`flex items-center justify-between px-5 py-4
-              ${concluida && m.vencedor === m.timeB ? "bg-success/15" : ""}
-              ${concluida && m.vencedor !== m.timeB && m.vencedor !== "" ? "opacity-40" : ""}
-            `}>
+            <div
+              data-player={m.timeB}
+              data-bt={m.battletagB}
+              data-plat={m.plataformaB}
+              className={`flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
+                ${concluida && m.vencedor === m.timeB ? "bg-success/15" : ""}
+                ${concluida && m.vencedor !== m.timeB && m.vencedor !== "" ? "opacity-40" : ""}
+              `}
+            >
               <div className="flex items-center gap-4 truncate">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-background shrink-0 shadow-md"
@@ -235,7 +286,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
                   {m.timeB ? m.timeB.substring(0, 2).toUpperCase() : "—"}
                 </div>
                 <div className="truncate space-y-0.5">
-                  <span className={`text-base font-bold uppercase tracking-wide block truncate ${concluida && m.vencedor === m.timeB ? "text-success" : "text-fg"}`}>
+                  <span className={`text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && m.vencedor === m.timeB ? "text-success" : "text-fg"}`}>
                     {m.timeB || "A definir"}
                   </span>
                   {m.mainB && m.mainB !== "-" ? (
@@ -271,9 +322,11 @@ function CardConfronto({ m }: { m: MatchItem }) {
 export default function PublicoPage() {
   const [aba, setAba] = useState<Aba>("inicio");
   const [subAbaRodada, setSubAbaRodada] = useState<string>("rodada1");
+  const [filtroStatus, setFiltroStatus] = useState<"todos" | "encerrado" | "aguardando">("todos");
   const [carregando, setCarregando] = useState(true);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
   const [modalPremio, setModalPremio] = useState<"lesserafim" | "sojourn" | null>(null);
+  const [jogadorPerfil, setJogadorPerfil] = useState<{ nome: string; battletag: string; plataforma: string; vitorias: number; derrotas: number; totalJogos: number } | null>(null);
 
   const [rodada1, setRodada1] = useState<MatchItem[]>([]);
   const [rodada2, setRodada2] = useState<MatchItem[]>([]);
@@ -364,9 +417,11 @@ export default function PublicoPage() {
             id: "",
             fase: "1ª Rodada",
             timeA: pA,
+            battletagA: btA,
             plataformaA: platA,
             scoreA: scA,
             timeB: pB,
+            battletagB: btB,
             plataformaB: platB,
             scoreB: scB,
             vencedor: venc,
@@ -514,6 +569,35 @@ export default function PublicoPage() {
     loadLiveData();
   }, []);
 
+  const abrirPerfilJogador = (nome: string, battletag?: string, plataforma?: string) => {
+    if (!nome || nome === "A definir") return;
+    const part = participantes.find(p => p.nome.toLowerCase() === nome.toLowerCase());
+
+    let vitorias = 0;
+    let derrotas = 0;
+    let totalJogos = 0;
+
+    const todasPartidas = [...rodada1, ...rodada2, ...oitavas, ...quartas, ...semifinais, ...grandeFinal];
+    todasPartidas.forEach(p => {
+      if (p.vencedor && p.vencedor.toLowerCase() === nome.toLowerCase()) {
+        vitorias++;
+        totalJogos++;
+      } else if (p.status === "concluida" && (p.timeA.toLowerCase() === nome.toLowerCase() || p.timeB.toLowerCase() === nome.toLowerCase())) {
+        derrotas++;
+        totalJogos++;
+      }
+    });
+
+    setJogadorPerfil({
+      nome,
+      battletag: battletag || part?.battletag || "Não informada",
+      plataforma: plataforma || part?.plataforma || "PC",
+      vitorias,
+      derrotas,
+      totalJogos
+    });
+  };
+
   const abas: { id: Aba; label: string }[] = [
     { id: "inicio", label: "Início & Premiação" },
     { id: "partidas", label: "Chaveamento & Partidas" },
@@ -531,6 +615,13 @@ export default function PublicoPage() {
   ];
 
   const rodadaAtualAtiva = rodadasTabs.find(r => r.id === subAbaRodada) || rodadasTabs[0];
+
+  const partidasFiltradas = rodadaAtualAtiva.data.filter(m => {
+    const concluida = m.status === "concluida" || m.vencedor !== "";
+    if (filtroStatus === "encerrado") return concluida;
+    if (filtroStatus === "aguardando") return !concluida;
+    return true;
+  });
 
   return (
     <main className="min-h-screen text-fg">
@@ -557,9 +648,10 @@ export default function PublicoPage() {
                 Atualizado às {ultimaAtualizacao.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
             )}
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/15 border border-success/30 text-success text-xs font-bold uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              Ao Vivo da Planilha
+            {/* Selo Animado "AO VIVO" com Pulsação em Neon */}
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-danger/20 border border-danger/50 text-danger text-xs font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse">
+              <span className="w-2.5 h-2.5 rounded-full bg-danger shadow-[0_0_10px_#ef4444]" />
+              Ao Vivo
             </span>
           </div>
         </div>
@@ -610,6 +702,12 @@ export default function PublicoPage() {
                     <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
                       Duelos intensos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3) com os mains de cada jogador e desempate com herói secreto e aleatório.
                     </p>
+
+                    {/* Contador Regressivo */}
+                    <div className="py-2">
+                      <p className="text-xs uppercase tracking-[0.2em] text-ow-orange font-bold mb-3">🕒 Início do Torneio em:</p>
+                      <CountdownTimer />
+                    </div>
 
                     {/* Premiação Destaque (Clicável) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
@@ -668,7 +766,7 @@ export default function PublicoPage() {
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="text-center max-w-xl mx-auto">
                   <h2 className="text-display text-3xl font-bold uppercase tracking-wider">Chaveamento Oficial</h2>
-                  <p className="text-fg-muted text-sm mt-1">Confrontos organizados cronologicamente por horário.</p>
+                  <p className="text-fg-muted text-sm mt-1">Confrontos organizados cronologicamente por horário. Clique no jogador para ver o perfil.</p>
                 </div>
 
                 {/* Sub-abas de Rodadas */}
@@ -688,20 +786,52 @@ export default function PublicoPage() {
                   ))}
                 </div>
 
+                {/* Filtros Rápidos de Status */}
+                <div className="flex gap-2 justify-center pt-2">
+                  {[
+                    { id: "todos", label: "Todos" },
+                    { id: "encerrado", label: "Encerrados" },
+                    { id: "aguardando", label: "Aguardando" },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setFiltroStatus(f.id as any)}
+                      className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider rounded-lg border transition-all ${
+                        filtroStatus === f.id
+                          ? "bg-ow-blue/20 text-ow-blue border-ow-blue/40 shadow-sm"
+                          : "bg-surface-2 text-fg-dim border-line hover:text-fg"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
                 {/* Exibição da Rodada Ativa */}
                 <section className="space-y-4 pt-2">
                   <h3 className="text-display text-xl font-bold uppercase text-ow-orange border-b border-line pb-2 flex items-center justify-between">
                     <span>{rodadaAtualAtiva.label}</span>
-                    <span className="text-xs font-normal text-fg-dim font-mono">{rodadaAtualAtiva.data.length} confrontos ordenados</span>
+                    <span className="text-xs font-normal text-fg-dim font-mono">{partidasFiltradas.length} confrontos exibidos</span>
                   </h3>
-                  {rodadaAtualAtiva.data.length === 0 ? (
+                  {partidasFiltradas.length === 0 ? (
                     <div className="surface-card p-12 text-center rounded-2xl border border-line-strong">
-                      <p className="text-fg-muted uppercase tracking-wider text-sm font-semibold">Nenhuma partida cadastrada para esta rodada ainda.</p>
+                      <p className="text-fg-muted uppercase tracking-wider text-sm font-semibold">Nenhuma partida encontrada com este filtro.</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {rodadaAtualAtiva.data.map((m) => (
-                        <CardConfronto key={m.id} m={m} />
+                      {partidasFiltradas.map((m) => (
+                        <div key={m.id} onClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          const playerEl = target.closest("[data-player]");
+                          if (playerEl) {
+                            const playerName = playerEl.getAttribute("data-player");
+                            const playerBt = playerEl.getAttribute("data-bt");
+                            const playerPlat = playerEl.getAttribute("data-plat");
+                            if (playerName) abrirPerfilJogador(playerName, playerBt || undefined, playerPlat || undefined);
+                          }
+                        }}>
+                          <CardConfronto m={m} />
+                        </div>
                       ))}
                     </div>
                   )}
@@ -764,7 +894,7 @@ export default function PublicoPage() {
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">⏱️ Duração das Partidas</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Cada partida tem duração prevista de 10 minutos. As regras são reforçadas a cada partida para os participantes.
+                      Each partida tem duração prevista de 10 minutos. As regras são reforçadas a cada partida para os participantes.
                     </p>
                   </div>
 
@@ -826,6 +956,60 @@ export default function PublicoPage() {
             </div>
             <p className="text-xs text-fg-dim text-center uppercase tracking-wider">
               Clique no X ou fora da janela para fechar
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Perfil do Jogador */}
+      {jogadorPerfil && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
+          onClick={() => setJogadorPerfil(null)}
+        >
+          <div
+            className="surface-card max-w-md w-full p-6 md:p-8 border-2 border-ow-blue rounded-3xl relative shadow-2xl space-y-5 bg-surface text-center"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center border-b border-line pb-3">
+              <h3 className="text-display text-xl font-bold uppercase text-ow-blue">Perfil do Jogador</h3>
+              <button
+                onClick={() => setJogadorPerfil(null)}
+                className="w-8 h-8 rounded-full bg-surface-2 hover:bg-ow-blue hover:text-background flex items-center justify-center font-bold text-fg transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-2xl font-bold text-background shadow-lg" style={{ background: "var(--grad-blue)" }}>
+              {jogadorPerfil.nome.substring(0, 2).toUpperCase()}
+            </div>
+
+            <div>
+              <h4 className="text-display text-2xl font-bold uppercase text-fg">{jogadorPerfil.nome}</h4>
+              <p className="text-sm font-mono text-ow-blue font-semibold mt-1">{jogadorPerfil.battletag}</p>
+              <span className="inline-block bg-surface-2 border border-line text-xs uppercase tracking-wider px-3 py-1 rounded-full text-fg-dim mt-2">
+                Plataforma: {jogadorPerfil.plataforma}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-line">
+              <div className="bg-surface-2 p-3 rounded-xl border border-line">
+                <span className="text-display text-xl font-bold text-success block">{jogadorPerfil.vitorias}</span>
+                <span className="text-[10px] uppercase tracking-wider text-fg-dim">Vitórias</span>
+              </div>
+              <div className="bg-surface-2 p-3 rounded-xl border border-line">
+                <span className="text-display text-xl font-bold text-danger block">{jogadorPerfil.derrotas}</span>
+                <span className="text-[10px] uppercase tracking-wider text-fg-dim">Derrotas</span>
+              </div>
+              <div className="bg-surface-2 p-3 rounded-xl border border-line">
+                <span className="text-display text-xl font-bold text-ow-orange block">{jogadorPerfil.totalJogos}</span>
+                <span className="text-[10px] uppercase tracking-wider text-fg-dim">Partidas</span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-fg-dim uppercase tracking-wider">
+              Estatísticas calculadas com base nas partidas oficiais da planilha.
             </p>
           </div>
         </div>
