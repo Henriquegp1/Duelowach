@@ -273,6 +273,7 @@ export default function PublicoPage() {
   const [subAbaRodada, setSubAbaRodada] = useState<string>("rodada1");
   const [carregando, setCarregando] = useState(true);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
+  const [modalPremio, setModalPremio] = useState<"lesserafim" | "sojourn" | null>(null);
 
   const [rodada1, setRodada1] = useState<MatchItem[]>([]);
   const [rodada2, setRodada2] = useState<MatchItem[]>([]);
@@ -610,24 +611,32 @@ export default function PublicoPage() {
                       Duelos intensos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3) com os mains de cada jogador e desempate com herói secreto e aleatório.
                     </p>
 
-                    {/* Premiação Destaque */}
+                    {/* Premiação Destaque (Clicável) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
-                      <div className="surface-card p-6 border-2 border-ow-orange rounded-2xl relative overflow-hidden bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:scale-[1.02] transition-transform">
+                      <div
+                        onClick={() => setModalPremio("lesserafim")}
+                        className="surface-card p-6 border-2 border-ow-orange rounded-2xl relative overflow-hidden bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:scale-[1.02] transition-transform cursor-pointer group"
+                      >
                         <div className="absolute top-0 right-0 bg-ow-orange text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                          1º Lugar
+                          1º Lugar (Clique para ver)
                         </div>
-                        <div className="text-5xl mb-3">🥇</div>
+                        <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🥇</div>
                         <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-1">Grande Campeão</h3>
-                        <p className="Test-fg font-bold text-lg">1º Bundle Le Sserafim</p>
+                        <p className="text-fg font-bold text-lg">1º Bundle Le Sserafim</p>
+                        <span className="inline-block text-[11px] text-ow-orange underline mt-2 font-semibold">Ver imagem do prêmio →</span>
                       </div>
 
-                      <div className="surface-card p-6 border-2 border-line-strong rounded-2xl relative overflow-hidden bg-gradient-to-br from-surface-2 via-surface to-surface hover:scale-[1.02] transition-transform shadow-lg">
+                      <div
+                        onClick={() => setModalPremio("sojourn")}
+                        className="surface-card p-6 border-2 border-line-strong rounded-2xl relative overflow-hidden bg-gradient-to-br from-surface-2 via-surface to-surface hover:scale-[1.02] transition-transform cursor-pointer group hover:border-ow-orange/50"
+                      >
                         <div className="absolute top-0 right-0 bg-fg-muted text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                          2º Lugar
+                          2º Lugar (Clique para ver)
                         </div>
-                        <div className="text-5xl mb-3">🥈</div>
+                        <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🥈</div>
                         <h3 className="text-display text-xl font-bold uppercase text-fg mb-1">Vice-Campeão</h3>
                         <p className="text-fg font-bold text-lg">Arma Mítica da Sojourn</p>
+                        <span className="inline-block text-[11px] text-ow-blue underline mt-2 font-semibold">Ver imagem do prêmio →</span>
                       </div>
                     </div>
                   </div>
@@ -785,6 +794,42 @@ export default function PublicoPage() {
           </>
         )}
       </div>
+
+      {/* Modal de Premiação */}
+      {modalPremio && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
+          onClick={() => setModalPremio(null)}
+        >
+          <div
+            className="surface-card max-w-3xl w-full p-6 md:p-8 border-2 border-ow-orange rounded-3xl relative shadow-2xl space-y-5 bg-surface"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center border-b border-line pb-4">
+              <h3 className="text-display text-2xl font-bold uppercase text-ow-orange flex items-center gap-2">
+                <span>{modalPremio === "lesserafim" ? "🥇" : "🥈"}</span>
+                {modalPremio === "lesserafim" ? "1º Lugar — Bundle Le Sserafim" : "2º Lugar — Arma Mítica da Sojourn"}
+              </h3>
+              <button
+                onClick={() => setModalPremio(null)}
+                className="w-10 h-10 rounded-full bg-surface-2 hover:bg-ow-orange hover:text-background flex items-center justify-center font-bold text-lg text-fg transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-line bg-background flex items-center justify-center aspect-video relative shadow-inner">
+              <img
+                src={modalPremio === "lesserafim" ? "https://images.blz-contentstack.com/v3/assets/blt9c12f249ac15c7e6/bltc2372f9d690a7862/653d9e84b726050b11a5477d/OW_LeSserafim_Keyart.jpg" : "https://images.blz-contentstack.com/v3/assets/blt9c12f249ac15c7e6/blte50e59a7f34f3b89/66a2e41366113b2e59cb3a7c/OW_S011_MythicWeapon_Sojourn.jpg"}
+                alt="Prêmio do Torneio"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <p className="text-xs text-fg-dim text-center uppercase tracking-wider">
+              Clique no X ou fora da janela para fechar
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
