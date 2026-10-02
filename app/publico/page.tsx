@@ -540,7 +540,7 @@ export default function PublicoPage() {
           <div className="flex items-center gap-4">
             <svg viewBox="0 0 48 48" fill="none" className="w-16 h-16 shrink-0 drop-shadow-[0_0_15px_rgba(249,158,26,0.4)]">
               <path fill="#F99E1A" d="M13.9 13.901a14.284 14.284 0 0 1 20.2 0l4.043-4.042a20 20 0 0 0-28.286 0z" />
-              <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 0 1-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
+              <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 01-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
             </svg>
             <div>
               <p className="text-xs uppercase tracking-[0.25em] text-ow-orange/90 font-semibold">Torneio Oficial · Akira</p>
@@ -734,7 +734,7 @@ export default function PublicoPage() {
               <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="text-center">
                   <h2 className="text-display text-3xl font-bold uppercase tracking-wider">Regras do Duelowach</h2>
-                  <p className="text-fg-muted text-sm mt-1">Entenda o formato e a dinâmica da competição.</p>
+                  <p className="test-fg-muted text-sm mt-1">Entenda o formato e a dinâmica da competição.</p>
                 </div>
 
                 <div className="grid gap-4">
