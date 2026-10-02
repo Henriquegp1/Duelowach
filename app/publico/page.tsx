@@ -802,7 +802,7 @@ export default function PublicoPage() {
           onClick={() => setModalPremio(null)}
         >
           <div
-            className="surface-card max-w-3xl w-full p-6 md:p-8 border-2 border-ow-orange rounded-3xl relative shadow-2xl space-y-5 bg-surface"
+            className="surface-card max-w-4xl w-full p-6 md:p-8 border-2 border-ow-orange rounded-3xl relative shadow-2xl space-y-5 bg-surface"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex justify-between items-center border-b border-line pb-4">
@@ -817,11 +817,11 @@ export default function PublicoPage() {
                 ✕
               </button>
             </div>
-            <div className="rounded-2xl overflow-hidden border border-line bg-background flex items-center justify-center aspect-video relative shadow-inner">
+            <div className="rounded-2xl overflow-hidden border border-line bg-background flex items-center justify-center p-2 relative shadow-inner">
               <img
-                src={modalPremio === "lesserafim" ? "https://static.wikia.nocookie.net/overwatch_gamepedia/images/1/15/Le_Sserafim_event_key_art.png" : "https://static.wikia.nocookie.net/overwatch_gamepedia/images/3/36/Sojourn_Mythic_weapon.png"}
+                src={modalPremio === "lesserafim" ? "/lesserafim.jpg" : "/sojourn.jpg"}
                 alt="Prêmio do Torneio"
-                className="w-full h-full object-contain bg-black/40"
+                className="max-h-[75vh] w-auto object-contain rounded-xl"
               />
             </div>
             <p className="text-xs text-fg-dim text-center uppercase tracking-wider">
