@@ -193,16 +193,16 @@ function CountdownTimer() {
   }, []);
 
   return (
-    <div className="flex justify-center gap-3 md:gap-4 my-4">
+    <div className="flex justify-center gap-2 md:gap-3">
       {[
         { label: "Dias", val: timeLeft.dias },
         { label: "Horas", val: timeLeft.horas },
         { label: "Minutos", val: timeLeft.minutos },
         { label: "Segundos", val: timeLeft.segundos },
       ].map((item, idx) => (
-        <div key={idx} className="surface-card px-4 py-3 rounded-2xl border border-ow-orange/40 bg-surface-2 text-center min-w-[70px] shadow-lg">
-          <span className="text-display text-2xl md:text-3xl font-bold text-ow-orange tabular-nums block">{String(item.val).padStart(2, "0")}</span>
-          <span className="text-[10px] text-fg-dim uppercase tracking-widest">{item.label}</span>
+        <div key={idx} className="surface-card px-3 py-2 rounded-xl border border-ow-orange/30 bg-surface-2 text-center min-w-[60px] shadow-md">
+          <span className="text-display text-xl md:text-2xl font-bold text-ow-orange tabular-nums block">{String(item.val).padStart(2, "0")}</span>
+          <span className="text-[9px] text-fg-dim uppercase tracking-widest">{item.label}</span>
         </div>
       ))}
     </div>
@@ -685,57 +685,63 @@ export default function PublicoPage() {
             {/* INÍCIO & PREMIAÇÃO */}
             {aba === "inicio" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {/* Hero Card / Banner */}
-                <section className="relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
-                  <div className="absolute inset-0 hero-grad opacity-40 pointer-events-none" />
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-ow-orange/10 blur-[80px] pointer-events-none" />
+                {/* Hero Card Compacto */}
+                <section className="relative rounded-3xl p-6 md:p-10 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_40px_rgba(249,158,26,0.12)] bg-gradient-to-b from-surface-2 to-surface">
+                  <div className="absolute inset-0 hero-grad opacity-30 pointer-events-none" />
 
-                  <div className="relative z-10 max-w-3xl mx-auto space-y-6">
+                  <div className="relative z-10 max-w-3xl mx-auto space-y-4">
                     <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ow-orange/15 border border-ow-orange/40 text-ow-orange text-xs font-bold uppercase tracking-[0.25em]">
                       ⚔️ Torneio 1v1 Exclusivo · Organizado por Akira
                     </span>
 
-                    <h2 className="text-display text-4xl md:text-6xl font-bold uppercase tracking-wide">
+                    <h2 className="text-display text-3xl md:text-5xl font-bold uppercase tracking-wide">
                       Bem-vindo ao <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Duelowach</span>
                     </h2>
 
-                    <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
+                    <p className="text-fg-muted text-sm md:text-base leading-relaxed max-w-xl mx-auto">
                       Duelos intensos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3) com os mains de cada jogador e desempate com herói secreto e aleatório.
                     </p>
+                  </div>
+                </section>
 
-                    {/* Contador Regressivo */}
-                    <div className="py-2">
-                      <p className="text-xs uppercase tracking-[0.2em] text-ow-orange font-bold mb-3">🕒 Início do Torneio em:</p>
-                      <CountdownTimer />
+                {/* Card Separado: Início do Torneio (Contador Regressivo) */}
+                <section className="surface-card rounded-2xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 max-w-2xl mx-auto">
+                  <h3 className="text-display text-lg font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
+                    <span>🕒</span> Início do Torneio em:
+                  </h3>
+                  <CountdownTimer />
+                </section>
+
+                {/* Card Separado: Premiação */}
+                <section className="space-y-4">
+                  <h3 className="text-display text-2xl font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2">
+                    <span className="text-ow-orange">✦</span> Premiação Oficial
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+                    <div
+                      onClick={() => setModalPremio("lesserafim")}
+                      className="surface-card p-6 border-2 border-ow-orange rounded-2xl relative overflow-hidden bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:scale-[1.02] transition-transform cursor-pointer group text-center"
+                    >
+                      <div className="absolute top-0 right-0 bg-ow-orange text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                        1º Lugar (Clique para ver)
+                      </div>
+                      <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🥇</div>
+                      <h4 className="text-display text-xl font-bold uppercase text-ow-orange mb-1">Grande Campeão</h4>
+                      <p className="text-fg font-bold text-lg">1º Bundle Le Sserafim</p>
+                      <span className="inline-block text-[11px] text-ow-orange underline mt-2 font-semibold">Ver imagem do prêmio →</span>
                     </div>
 
-                    {/* Premiação Destaque (Clicável) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
-                      <div
-                        onClick={() => setModalPremio("lesserafim")}
-                        className="surface-card p-6 border-2 border-ow-orange rounded-2xl relative overflow-hidden bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:scale-[1.02] transition-transform cursor-pointer group"
-                      >
-                        <div className="absolute top-0 right-0 bg-ow-orange text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                          1º Lugar (Clique para ver)
-                        </div>
-                        <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🥇</div>
-                        <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-1">Grande Campeão</h3>
-                        <p className="text-fg font-bold text-lg">1º Bundle Le Sserafim</p>
-                        <span className="inline-block text-[11px] text-ow-orange underline mt-2 font-semibold">Ver imagem do prêmio →</span>
+                    <div
+                      onClick={() => setModalPremio("sojourn")}
+                      className="surface-card p-6 border-2 border-line-strong rounded-2xl relative overflow-hidden bg-gradient-to-br from-surface-2 via-surface to-surface hover:scale-[1.02] transition-transform cursor-pointer group hover:border-ow-orange/50 text-center"
+                    >
+                      <div className="absolute top-0 right-0 bg-fg-muted text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                        2º Lugar (Clique para ver)
                       </div>
-
-                      <div
-                        onClick={() => setModalPremio("sojourn")}
-                        className="surface-card p-6 border-2 border-line-strong rounded-2xl relative overflow-hidden bg-gradient-to-br from-surface-2 via-surface to-surface hover:scale-[1.02] transition-transform cursor-pointer group hover:border-ow-orange/50"
-                      >
-                        <div className="absolute top-0 right-0 bg-fg-muted text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                          2º Lugar (Clique para ver)
-                        </div>
-                        <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🥈</div>
-                        <h3 className="text-display text-xl font-bold uppercase text-fg mb-1">Vice-Campeão</h3>
-                        <p className="text-fg font-bold text-lg">Arma Mítica da Sojourn</p>
-                        <span className="inline-block text-[11px] text-ow-blue underline mt-2 font-semibold">Ver imagem do prêmio →</span>
-                      </div>
+                      <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🥈</div>
+                      <h4 className="text-display text-xl font-bold uppercase text-fg mb-1">Vice-Campeão</h4>
+                      <p className="text-fg font-bold text-lg">Arma Mítica da Sojourn</p>
+                      <span className="inline-block text-[11px] text-ow-blue underline mt-2 font-semibold">Ver imagem do prêmio →</span>
                     </div>
                   </div>
                 </section>
@@ -894,7 +900,7 @@ export default function PublicoPage() {
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">⏱️ Duração das Partidas</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Each partida tem duração prevista de 10 minutos. As regras são reforçadas a cada partida para os participantes.
+                      Cada partida tem duração prevista de 10 minutos. As regras são reforçadas a cada partida para os participantes.
                     </p>
                   </div>
 
