@@ -819,9 +819,9 @@ export default function PublicoPage() {
             </div>
             <div className="rounded-2xl overflow-hidden border border-line bg-background flex items-center justify-center aspect-video relative shadow-inner">
               <img
-                src={modalPremio === "lesserafim" ? "https://images.blz-contentstack.com/v3/assets/blt9c12f249ac15c7e6/bltc2372f9d690a7862/653d9e84b726050b11a5477d/OW_LeSserafim_Keyart.jpg" : "https://images.blz-contentstack.com/v3/assets/blt9c12f249ac15c7e6/blte50e59a7f34f3b89/66a2e41366113b2e59cb3a7c/OW_S011_MythicWeapon_Sojourn.jpg"}
+                src={modalPremio === "lesserafim" ? "https://static.wikia.nocookie.net/overwatch_gamepedia/images/1/15/Le_Sserafim_event_key_art.png" : "https://static.wikia.nocookie.net/overwatch_gamepedia/images/3/36/Sojourn_Mythic_weapon.png"}
                 alt="Prêmio do Torneio"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-black/40"
               />
             </div>
             <p className="text-xs text-fg-dim text-center uppercase tracking-wider">
