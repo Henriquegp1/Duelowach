@@ -819,7 +819,7 @@ export default function PublicoPage() {
             </div>
             <div className="rounded-2xl overflow-hidden border border-line bg-background flex items-center justify-center p-2 relative shadow-inner">
               <img
-                src={modalPremio === "lesserafim" ? "/lesserafim.jpg" : "/sojourn.jpg"}
+                src={modalPremio === "lesserafim" ? "/lesserafim.png" : "/sojourn.png"}
                 alt="Prêmio do Torneio"
                 className="max-h-[75vh] w-auto object-contain rounded-xl"
               />
