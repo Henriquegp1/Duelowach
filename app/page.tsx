@@ -105,10 +105,10 @@ export default function LoginPage() {
 
           <div>
             <h1 className="text-display text-4xl font-bold uppercase tracking-wide drop-shadow-md">
-              Overwatch <span className="text-ow-orange">Stadium</span>
+              Duel<span className="text-ow-orange">owach</span>
             </h1>
             <p className="text-fg-muted font-semibold uppercase tracking-widest text-sm mt-2 drop-shadow-md">
-              Plataforma de Torneios
+              Torneio Oficial do Akira
             </p>
           </div>
         </div>

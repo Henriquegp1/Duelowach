@@ -20,8 +20,8 @@ const rajdhani = Rajdhani({
 });
 
 export const metadata: Metadata = {
-  title: "Overwatch Stadium",
-  description: "Plataforma oficial do campeonato Overwatch Stadium — acompanhe equipes, partidas e classificação ao vivo.",
+  title: "Duelowach — Torneio Oficial do Akira",
+  description: "Plataforma oficial do torneio Duelowach — acompanhe o chaveamento, partidas e pódio ao vivo.",
 };
 
 export default function RootLayout({

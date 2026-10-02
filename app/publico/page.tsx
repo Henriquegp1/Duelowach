@@ -1,453 +1,535 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 
-const API = "https://web-production-aeb1b.up.railway.app";
-const POLLING_INTERVAL = 30000;
+const SHEET_API_URL = "/api/sheet";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+const FALLBACK_CSV = `
+,,,,,,,,,,
+⚔️ ESCALA DO DUELO,,,,,TOTAL DUELOS,CONCLUÍDOS,PENDENTES,TOTAL JOGADORES,,
+Quadro Oficial de Confrontos e Resultados do Torneio,,,,,32,1,31,64,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+Jogador A,BattleTag A,Plataforma A,Placar A,Placar B,Jogador B,BattleTag B,Plataforma B,Vencedor,Horário,
+Seabound,Seabound#21555,PC,,,Luke,Luke#27915,PC,,"Sábado, 19:30h",
+Henrique,Overtaker#21285,PC,,,KrisinBR#1211,KrisinBR#1211,PC,,"Sábado, 19:40h",
+leonblack,leonblack#21328,XBOX Series S/X,,,Matheus/ Garcia,lonwannatalk#2536,PC,,"Sábado, 19:50h",
+Icebebeco,Icebebeco#1930,XBOX One (Normal ou S),,,snow,snow#29326,PC,,"Sábado, 20:00h",
+iLuny19,iLuny19#2491,PlayStation 4,,,Drummond,Drummond#11786,PC,,"Sábado, 20:10h",
+Walterwhite,Walterwhite#23165,XBOX Series S/X,,,tody,Docinho#21662,PC,,"Sábado, 20:20h",
+NEXTAGEII,NEXTAGEII#1645,PlayStadion 5,,,EficieAndre,EficieAndre#1914,PC,,"Sábado, 20:30h",
+INBIAZ2000,INBIAZ2000#2305,PC,,,Kalton22,Kalton22#2919,XBOX Series S/X,,"Sábado, 20:40h",
+TTVLEOLYRIOP,TTVLEOLYRIOP #1114,PlayStadion 5,,,NEXT,NEXT#12545,Xbox,,"Sábado, 20:50h",
+fogo,fogooo#2122,PC,,,oscarzin1227,Oscarzin1227 #2503,PC,,"Sábado, 21:00h",
+saiku,saiku#21790,XBOX One (Normal ou S),,,BritneyB,BritneyB#1988,PC,,"Sábado, 21:10h",
+POSVSECTOMIA,POSVSECTOMIA,PC,,,Rato,Rato #21999,PC,,"Sábado, 21:20h",
+Tori,Tori#22860,PC,,,HanzodoJob,HanzodoJob#1357,PC,,"Sábado, 21:30h",
+RheaTracy,RheaTracy #1864,PC,,,XSaTurn0,XSaTurn0#1164,XBOX Series S/X,,"Sábado, 21:40h",
+Viøłet,Viøłet#2832,PlayStation 4,,,CAFEINADO,Cafeinado#21268,PlayStation 4,,"Sábado, 21:50h",
+yoshiki,luesancar#1517,Xbox,,,WindExile - André,Wind#1464,PC,,"Sábado, 22:00h",
+Salomao2026,Salomao2021 #1712,PC,0,0,BlackWolf,BlackWolf#14881,XBOX One (Normal ou S),Empate,"Sexta-feira, 19:30h",
+GYta,GYTA#21353,PlayStadion 5,,,dani02908,DANI02908#1120,PC,,"Sexta-feira, 19:40h",
+chicobento,chicobento #21209,PC,,,Wilkher02,Wilkher02#2666 ,PlayStadion 5,,"Sexta-feira, 19:50h",
+JUNDERZ,JUNDER#1325,PC,,,Alewoja,Alewoja#1608,XBOX Series S/X,,"Sexta-feira, 20:00h",
+Salomao2021,Salomao2021 #1712,PC,,,Maria eduarda,Twilight#13390,XBOX One (Normal ou S),,"Sexta-feira, 20:10h",
+C4BRAL,C4bral #1499,PC,,,GAB3,GaB3 #21760,PC,,"Sexta-feira, 20:20h",
+Sivil,Sivil#11412,PC,,,Fussy,Fussy#21790,PC,,"Sexta-feira, 20:30h",
+roquelando,roquelando16#2895,PC,,,Katz,Yuno9#1749,PC,,"Sexta-feira, 20:40h",
+nightlucky,nightlucky#11893,PC,,,Monte,Monte,XBOX Series S/X,,"Sexta-feira, 20:50h",
+NekroM,NekroM#11256,PC,,,Cegobomdmira,CegobomdMira#2359,PC,,"Sexta-feira, 21:00h",
+SCOTTZIMMM,SCOTTZIMMM#1800,PC,,,Tchotcho1,Tchotcho1#1944,PC,,"Sexta-feira, 21:10h",
+YUNNIjoga,YUNNIjoga#2520,PC,,,Squirtle,Squirtle#13638,PC,,"Sexta-feira, 21:20h",
+Guilherme/NosferatuAlu,NosferatuAlu#21567,PC,,,MAGO,MAGO#12120,XBOX One (Normal ou S),,"Sexta-feira, 21:30h",
+Faminto,OthalDoFamin#1399,XBOX Series S/X,,,LeandroCheat,LEANDROCHEAT#2184,XBOX One (Normal ou S),,"Sexta-feira, 21:40h",
+Chara,Chara#12404,PC,,,Scaper,Scaper#21864,PC,,"Sexta-feira, 21:50h",
+flopade,flopade#1214,PlayStadion 5,,,Negolukarai,Negolukarai#1113,PC,,"Sexta-feira, 22:00h",
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+⚔️ 2.ª RODADA — DEZESSEIS-AVOS DE FINAL (MD3) • 16 JOGOS,,,,,,,,,
+Confronto,Jogador A,Main A,Plataforma A,Placar A,Placar B,Jogador B,Main B,Plataforma B,Vencedor,Status
+Jogo 01,Vencedor Jogo 01,-,-,,,Vencedor Jogo 02,-,-,,Pendente
+Jogo 02,Vencedor Jogo 03,-,-,,,Vencedor Jogo 04,-,-,,Pendente
+Jogo 03,Vencedor Jogo 05,-,-,,,Vencedor Jogo 06,-,-,,Pendente
+Jogo 04,Vencedor Jogo 07,-,-,,,Vencedor Jogo 08,-,-,,Pendente
+Jogo 05,Vencedor Jogo 09,-,-,,,Vencedor Jogo 10,-,-,,Pendente
+Jogo 06,Vencedor Jogo 11,-,-,,,Vencedor Jogo 12,-,-,,Pendente
+Jogo 07,Vencedor Jogo 13,-,-,,,Vencedor Jogo 14,-,-,,Pendente
+Jogo 08,Vencedor Jogo 15,-,-,,,Vencedor Jogo 16,-,-,,Pendente
+Jogo 09,Vencedor Jogo 17,-,-,,0,Vencedor Jogo 18,-,-,,Pendente
+Jogo 10,Vencedor Jogo 19,-,-,0,0,Vencedor Jogo 20,-,-,,Pendente
+Jogo 11,Vencedor Jogo 21,-,-,,,Vencedor Jogo 22,-,-,,Pendente
+Jogo 12,Vencedor Jogo 23,-,-,,,Vencedor Jogo 24,-,-,,Pendente
+Jogo 13,Vencedor Jogo 25,-,-,,,Vencedor Jogo 26,-,-,,Pendente
+Jogo 14,Vencedor Jogo 27,-,-,,,Vencedor Jogo 28,-,-,,Pendente
+Jogo 15,Vencedor Jogo 29,-,-,,,Vencedor Jogo 30,-,-,,Pendente
+Jogo 16,Vencedor Jogo 31,-,-,,,Vencedor Jogo 32,-,-,,Pendente
+,,,,,,,,,
+⚔️ 3.ª RODADA — OITAVAS DE FINAL (MD3) • 8 JOGOS,,,,,,,,,
+Confronto,Jogador A,Main A,Plataforma A,Placar A,Placar B,Jogador B,Main B,Plataforma B,Vencedor,Status
+Oitavas 01,Vencedor Jogo 01,-,-,,,Vencedor Jogo 02,-,-,,Pendente
+Oitavas 02,Vencedor Jogo 03,-,-,,,Vencedor Jogo 04,-,-,,Pendente
+Oitavas 03,Vencedor Jogo 05,-,-,,,Vencedor Jogo 06,-,-,,Pendente
+Oitavas 04,Vencedor Jogo 07,-,-,,,Vencedor Jogo 08,-,-,,Pendente
+Oitavas 05,Vencedor Jogo 09,-,-,0,0,Vencedor Jogo 10,-,-,,Pendente
+Oitavas 06,Vencedor Jogo 11,-,-,,,Vencedor Jogo 12,-,-,,Pendente
+Oitavas 07,Vencedor Jogo 13,-,-,,,Vencedor Jogo 14,-,-,,Pendente
+Oitavas 08,Vencedor Jogo 15,-,-,,,Vencedor Jogo 16,-,-,,Pendente
+,,,,,,,,,
+⚔️ 4.ª RODADA — QUARTAS DE FINAL (MD3) • 4 JOGOS,,,,,,,,,
+Confronto,Jogador A,Main A,Plataforma A,Placar A,Placar B,Jogador B,Main B,Plataforma B,Vencedor,Status
+Quartas 01,Vencedor OF 01,-,-,,,Vencedor OF 02,-,-,,Pendente
+Quartas 02,Vencedor OF 03,-,-,,,Vencedor OF 04,-,-,,Pendente
+Quartas 03,Vencedor OF 05,-,-,,,Vencedor OF 06,-,-,,Pendente
+Quartas 04,Vencedor OF 07,-,-,,,Vencedor OF 08,-,-,,Pendente
+,,,,,,,,,
+⚔️ 5.ª RODADA — SEMIFINAIS (MD3) • 2 JOGOS,,,,,,,,,
+Confronto,Jogador A,Main A,Plataforma A,Placar A,Placar B,Jogador B,Main B,Plataforma B,Vencedor,Status
+Semifinal 01,Vencedor QF 01,-,-,,,Vencedor QF 02,-,-,,Pendente
+Semifinal 02,Vencedor QF 03,-,-,,,Vencedor QF 04,-,-,,Pendente
+,,,,,,,,,
+⚔️ 6.ª RODADA — GRANDE FINAL (MD3),,,,,,,,,
+Confronto,Jogador A,Main A,Plataforma A,Placar A,Placar B,Jogador B,Main B,Plataforma B,Vencedor,Status
+Grande Final,Vencedor SF 01,-,-,,,Vencedor SF 02,-,-,,Pendente
+,,,,,,,,,
+⚔️ PÓDIO DOS CAMPEÕES,,,,,,,,,
+Posicao,Jogador,Título,Medalha,,,,,,,
+1º Lugar,A definir,Grande Campeão,Ouro 🥇,,,,,,,
+2º Lugar,A definir,Vice-Campeão,Prata 🥈,,,,,,,
+3º Lugar,A definir,3º Colocado,Bronze 🥉,,,,,,,
+`;
 
-interface Jogador {
-  battletag: string;
-  role: string;
-  rank: string;
-}
-
-interface Equipe {
-  id: number;
-  nome: string;
-  nome_capitao: string;
-  grupo: string | null;
-  fase_atual: string;
-  pontuacao_rank: number;
-  vitorias: number;
-  derrotas: number;
-  saldo_mapas: number;
-  tem_jogador_desclassificado: boolean;
-  horarios: string[];
-  dias: string[];
-  jogadores: Jogador[];
-}
-
-interface Partida {
-  id: number;
+interface MatchItem {
+  id: string;
   fase: string;
-  grupo: string | null;
+  timeA: string;
+  mainA?: string;
+  plataformaA?: string;
+  scoreA: string;
+  timeB: string;
+  mainB?: string;
+  plataformaB?: string;
+  scoreB: string;
+  vencedor: string;
   status: string;
-  score_a: number | null;
-  score_b: number | null;
-  time_a: string;
-  time_b: string;
-  vencedor: string | null;
-  streamer: string | null;
-  horario_agendado: string | null;
+  horario?: string;
 }
 
-type Grupos = Record<string, { nome: string; vitorias: number; derrotas: number; saldo_mapas: number; mapas_pro: number }[]>;
-type Aba = "inicio" | "equipes" | "partidas" | "grupos";
-type OrdemEquipes = "pontuacao" | "nome" | "fase";
-
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const STREAMERS = [
-  { value: "akiralegacy", label: "AkiraLegacy" },
-  { value: "foythtv", label: "FoythTV" },
-  { value: "violetkill", label: "VioletKill" },
-];
-
-const ROLE_COLOR: Record<string, string> = {
-  tank:    "bg-role-tank/15 text-role-tank border-role-tank/30",
-  dps:     "bg-role-dps/15 text-role-dps border-role-dps/30",
-  damage:  "bg-role-dps/15 text-role-dps border-role-dps/30",
-  support: "bg-role-support/15 text-role-support border-role-support/30",
-  flex:    "bg-fg-muted/15 text-fg-muted border-fg-muted/30",
-};
-
-const ROLE_LABEL: Record<string, string> = {
-  tank: "TANK", dps: "DPS", damage: "DPS", support: "SUP", flex: "FLEX",
-};
-
-const ROLE_ICON: Record<string, string> = {
-  tank:    "https://static.wikia.nocookie.net/overwatch_gamepedia/images/c/c8/Role_Tank_Circle.svg/revision/latest/scale-to-width-down/120?cb=20250727105320",
-  dps:     "https://static.wikia.nocookie.net/overwatch_gamepedia/images/8/80/Role_Damage_Circle.svg/revision/latest/scale-to-width-down/120?cb=20250727105011",
-  damage:  "https://static.wikia.nocookie.net/overwatch_gamepedia/images/8/80/Role_Damage_Circle.svg/revision/latest/scale-to-width-down/120?cb=20250727105011",
-  support: "https://static.wikia.nocookie.net/overwatch_gamepedia/images/9/93/Role_Support_Circle.svg/revision/latest/scale-to-width-down/120?cb=20250727105200",
-};
-
-const LABEL_HORARIO: Record<string, string> = { manha: "Manhã", tarde: "Tarde", noite: "Noite" };
-const LABEL_DIA: Record<string, string> = {
-  segunda: "Seg", terca: "Ter", quarta: "Qua", quinta: "Qui",
-  sexta: "Sex", sabado: "Sáb", domingo: "Dom",
-};
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function iniciais(nome: string) {
-  return nome.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("") || "OS";
+interface Participant {
+  nome: string;
+  battletag: string;
+  plataforma: string;
 }
 
-// ─── Sub-components (fora do componente pai — boa prática) ───────────────────
-
-function Brasao({ nome, size = 48 }: { nome: string; size?: number }) {
-  return (
-    <div
-      className="rounded-xl flex items-center justify-center font-bold text-display text-background shrink-0"
-      style={{
-        width: size, height: size,
-        background: "var(--grad-orange)",
-        boxShadow: "0 6px 20px -8px rgba(249,158,26,0.5)",
-        fontSize: size * 0.42,
-      }}
-    >
-      {iniciais(nome)}
-    </div>
-  );
+interface PodioItem {
+  posicao: string;
+  jogador: string;
+  titulo: string;
+  medalha: string;
 }
 
-function CardMataMata({ p }: { p: Partida }) {
-  const concluida = p.status === "concluida" || p.status === "bye";
-  const isBye = p.time_b === "BYE";
+type Aba = "inicio" | "partidas" | "podio" | "regras";
+
+function parseCSVLine(text: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim().replace(/^"|"$/g, ''));
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim().replace(/^"|"$/g, ''));
+  return result;
+}
+
+function parseHorarioToMinutes(horarioStr: string): number {
+  if (!horarioStr) return 999999;
+  const lower = horarioStr.toLowerCase();
+  let dayVal = 0;
+  if (lower.includes("sexta")) dayVal = 1000;
+  else if (lower.includes("sábado") || lower.includes("sabado")) dayVal = 2000;
+  else if (lower.includes("domingo")) dayVal = 3000;
+
+  const match = lower.match(/(\d{1,2}):(\d{2})/);
+  if (match) {
+    const hours = parseInt(match[1], 10);
+    const mins = parseInt(match[2], 10);
+    return dayVal + hours * 60 + mins;
+  }
+  return dayVal;
+}
+
+function CardConfronto({ m }: { m: MatchItem }) {
+  const concluida = m.status === "concluida" || m.vencedor !== "";
+  const isBye = m.timeB === "BYE";
 
   return (
-    <article className="surface-card p-0 overflow-hidden">
+    <article className="surface-card p-0 overflow-hidden border border-line-strong hover:border-ow-orange/50 transition-all duration-300 shadow-xl rounded-2xl mb-4">
       <div className="flex items-stretch">
-        {/* Número */}
-        <div className="flex items-center justify-center min-w-[40px] bg-surface-2 border-r border-line">
-          <span className="text-[10px] font-bold text-fg-dim">#{p.id}</span>
+        {/* ID / Duelo e Horário Destacado */}
+        <div className="flex flex-col items-center justify-center min-w-[105px] bg-surface-2 border-r border-line px-3 py-4 text-center">
+          <span className="text-[10px] text-fg-dim uppercase tracking-widest font-semibold">Duelo</span>
+          <span className="text-sm font-bold text-ow-orange font-mono uppercase mt-0.5">{m.id}</span>
+          {m.horario && m.horario !== "" && (
+            <span className="text-[10px] font-bold text-ow-orange bg-ow-orange/15 px-2.5 py-1 rounded-md border border-ow-orange/30 mt-2.5 whitespace-nowrap shadow-sm">
+              🕐 {m.horario}
+            </span>
+          )}
         </div>
 
-        {/* Times */}
+        {/* Competidores / Placar */}
         <div className="flex-1 flex flex-col">
-          {/* Time A */}
-          <div className={`flex items-center gap-3 px-4 py-3
-            ${concluida && p.vencedor === p.time_a ? "bg-success/10" : ""}
-            ${concluida && p.vencedor !== p.time_a && !isBye ? "opacity-40" : ""}
+          {/* Jogador A */}
+          <div className={`flex items-center justify-between px-5 py-4
+            ${concluida && m.vencedor === m.timeA ? "bg-success/15" : ""}
+            ${concluida && m.vencedor !== m.timeA && m.vencedor !== "" && !isBye ? "opacity-40" : ""}
           `}>
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-background shrink-0"
-              style={{ background: "var(--grad-orange)" }}
-            >
-              {iniciais(p.time_a)}
+            <div className="flex items-center gap-4 truncate">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-background shrink-0 shadow-md"
+                style={{ background: "var(--grad-orange)" }}
+              >
+                {m.timeA ? m.timeA.substring(0, 2).toUpperCase() : "—"}
+              </div>
+              <div className="truncate space-y-0.5">
+                <span className={`text-base font-bold uppercase tracking-wide block truncate ${concluida && m.vencedor === m.timeA ? "text-success" : "text-fg"}`}>
+                  {m.timeA || "A definir"}
+                </span>
+                {m.mainA && m.mainA !== "-" ? (
+                  <p className="text-xs text-ow-orange font-semibold">Main: {m.mainA}</p>
+                ) : m.plataformaA ? (
+                  <span className="text-[10px] text-fg-dim uppercase tracking-wider block">{m.plataformaA}</span>
+                ) : null}
+              </div>
             </div>
-            <span className={`flex-1 text-sm font-bold uppercase tracking-wide truncate ${concluida && p.vencedor === p.time_a ? "text-success" : "text-fg"}`}>
-              {p.time_a}
-            </span>
-            {concluida && (
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border shrink-0 ${
-                p.vencedor === p.time_a ? "bg-success/15 text-success border-success/30" : "text-fg-dim border-line"
-              }`}>
-                {p.vencedor === p.time_a ? "Avança" : "Eliminado"}
-              </span>
-            )}
+            <span className="font-mono font-bold text-2xl px-4 text-fg tabular-nums">{m.scoreA}</span>
           </div>
 
-          <div className="h-px bg-line mx-4" />
+          <div className="h-px bg-line mx-5" />
 
-          {/* Time B */}
+          {/* Jogador B */}
           {isBye ? (
-            <div className="flex items-center gap-3 px-4 py-3 opacity-30">
-              <div className="w-7 h-7 rounded-lg bg-surface-2 border border-line shrink-0" />
+            <div className="flex items-center gap-4 px-5 py-4 opacity-30">
+              <div className="w-9 h-9 rounded-xl bg-surface-2 border border-line shrink-0" />
               <span className="text-sm text-fg-dim italic">BYE — passa automaticamente</span>
             </div>
           ) : (
-            <div className={`flex items-center gap-3 px-4 py-3
-              ${concluida && p.vencedor === p.time_b ? "bg-success/10" : ""}
-              ${concluida && p.vencedor !== p.time_b ? "opacity-40" : ""}
+            <div className={`flex items-center justify-between px-5 py-4
+              ${concluida && m.vencedor === m.timeB ? "bg-success/15" : ""}
+              ${concluida && m.vencedor !== m.timeB && m.vencedor !== "" ? "opacity-40" : ""}
             `}>
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-background shrink-0"
-                style={{ background: "var(--grad-blue)" }}
-              >
-                {iniciais(p.time_b)}
+              <div className="flex items-center gap-4 truncate">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-background shrink-0 shadow-md"
+                  style={{ background: "var(--grad-blue)" }}
+                >
+                  {m.timeB ? m.timeB.substring(0, 2).toUpperCase() : "—"}
+                </div>
+                <div className="truncate space-y-0.5">
+                  <span className={`text-base font-bold uppercase tracking-wide block truncate ${concluida && m.vencedor === m.timeB ? "text-success" : "text-fg"}`}>
+                    {m.timeB || "A definir"}
+                  </span>
+                  {m.mainB && m.mainB !== "-" ? (
+                    <p className="text-xs text-ow-orange font-semibold">Main: {m.mainB}</p>
+                  ) : m.plataformaB ? (
+                    <span className="text-[10px] text-fg-dim uppercase tracking-wider block">{m.plataformaB}</span>
+                  ) : null}
+                </div>
               </div>
-              <span className={`flex-1 text-sm font-bold uppercase tracking-wide truncate ${concluida && p.vencedor === p.time_b ? "text-success" : "text-fg"}`}>
-                {p.time_b}
-              </span>
-              {concluida && (
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider border shrink-0 ${
-                  p.vencedor === p.time_b ? "bg-success/15 text-success border-success/30" : "text-fg-dim border-line"
-                }`}>
-                  {p.vencedor === p.time_b ? "Avança" : "Eliminado"}
-                </span>
-              )}
+              <span className="font-mono font-bold text-2xl px-4 text-fg tabular-nums">{m.scoreB}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between px-4 py-2 bg-surface-2 border-t border-line gap-3">
-        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+      {/* Footer Status */}
+      <div className="flex items-center justify-between px-5 py-3 bg-surface-2 border-t border-line">
+        <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
           concluida ? "bg-success/15 text-success border-success/30" : "bg-surface-2 text-fg-muted border-line"
         }`}>
           {concluida ? "Encerrado" : "Aguardando"}
         </span>
-        <div className="flex items-center gap-3">
-          {concluida && p.vencedor && (
-            <span className="text-[10px] text-fg-dim">
-              Classificado: <span className="text-fg font-semibold">{p.vencedor}</span>
-            </span>
-          )}
-          {!concluida && p.horario_agendado && (
-            <span className="text-[10px] text-fg-dim">
-              🕐 {new Date(p.horario_agendado).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-            </span>
-          )}
-          {p.streamer && (
-            <a
-              href={`https://twitch.tv/${p.streamer}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-danger/15 hover:bg-danger/25 border border-danger/30 text-danger text-[10px] font-bold rounded-lg transition-colors uppercase tracking-wider"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-danger live-dot" />
-              {p.streamer}
-            </a>
-          )}
-        </div>
+        {concluida && m.vencedor && (
+          <span className="text-xs text-fg-dim">
+            Vencedor: <span className="text-success font-bold uppercase tracking-wide">{m.vencedor}</span>
+          </span>
+        )}
       </div>
     </article>
   );
 }
-
-function CardPartida({ p }: { p: Partida }) {
-  const ao_vivo = p.status === "em_andamento";
-  const concluida = p.status === "concluida";
-  return (
-    <article className="surface-card p-5">
-      <div className="flex justify-between items-center mb-4">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-fg-dim font-semibold">
-          {p.fase}{p.grupo ? ` · Grupo ${p.grupo}` : ""}
-        </span>
-        <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border ${
-          concluida   ? "bg-success/15 text-success border-success/30"
-          : ao_vivo   ? "bg-danger/15 text-danger border-danger/30"
-          : "bg-surface-2 text-fg-muted border-line"
-        }`}>
-          {ao_vivo && <span className="w-1.5 h-1.5 rounded-full bg-danger live-dot" />}
-          {p.status.replace(/_/g, " ")}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <p className={`text-display text-lg md:text-xl font-bold uppercase text-right truncate ${p.vencedor === p.time_a ? "text-success" : "text-fg"}`}>
-          {p.time_a}
-        </p>
-        <div className="text-display text-3xl md:text-4xl font-bold tabular-nums flex items-center gap-3">
-          <span className={p.vencedor === p.time_a ? "text-ow-orange" : "text-fg"}>{p.score_a ?? "—"}</span>
-          <span className="text-fg-dim text-xl">×</span>
-          <span className={p.vencedor === p.time_b ? "text-ow-orange" : "text-fg"}>{p.score_b ?? "—"}</span>
-        </div>
-        <p className={`text-display text-lg md:text-xl font-bold uppercase truncate ${p.vencedor === p.time_b ? "text-success" : "text-fg"}`}>
-          {p.time_b}
-        </p>
-      </div>
-
-      {concluida && p.score_a !== null && p.score_b !== null && (
-        <div className="flex justify-between text-[10px] text-fg-dim mt-2 px-1">
-          <span>saldo: {p.score_a - p.score_b >= 0 ? "+" : ""}{p.score_a - p.score_b}</span>
-          <span>saldo: {p.score_b - p.score_a >= 0 ? "+" : ""}{p.score_b - p.score_a}</span>
-        </div>
-      )}
-
-      {(p.horario_agendado || p.streamer) && (
-        <div className="flex flex-wrap items-center justify-between gap-3 mt-3 pt-3 border-t border-line">
-          {p.horario_agendado && (
-            <span className="text-xs text-fg-muted">
-              🕐 {new Date(p.horario_agendado).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-            </span>
-          )}
-          {p.streamer && (
-            <a
-              href={`https://twitch.tv/${p.streamer}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-1.5 bg-danger/15 hover:bg-danger/25 border border-danger/30 text-danger text-xs font-bold rounded-lg transition-colors uppercase tracking-wider"
-            >
-              <span className="w-2 h-2 rounded-full bg-danger live-dot" />
-              Assistir — {STREAMERS.find((s) => s.value === p.streamer)?.label ?? p.streamer}
-            </a>
-          )}
-        </div>
-      )}
-    </article>
-  );
-}
-
-function CardEquipe({ equipe }: { equipe: Equipe }) {
-  return (
-    <article className={`surface-card p-5 md:p-6 relative overflow-hidden ${equipe.tem_jogador_desclassificado ? "ring-1 ring-danger/40" : ""}`}>
-      <span
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{
-          background: equipe.tem_jogador_desclassificado ? "var(--danger)"
-            : equipe.grupo ? "var(--grad-blue)"
-            : "var(--grad-orange)",
-        }}
-      />
-      <div className="flex flex-wrap justify-between items-start gap-4 mb-5 pl-2">
-        <div className="flex items-center gap-4">
-          <Brasao nome={equipe.nome} />
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-display text-xl font-bold uppercase">{equipe.nome}</h2>
-              {equipe.grupo && (
-                <span className="bg-ow-blue/15 text-ow-blue border border-ow-blue/30 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                  Grupo {equipe.grupo}
-                </span>
-              )}
-              {equipe.tem_jogador_desclassificado && (
-                <span className="bg-danger/15 text-danger border border-danger/30 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                  ⚠ Desclassificado
-                </span>
-              )}
-              {equipe.fase_atual === "eliminado" && (
-                <span className="bg-danger/15 text-danger border border-danger/30 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                  ✕ Eliminado
-                </span>
-              )}
-            </div>
-            <p className="text-fg-muted text-sm mt-0.5">Capitão · <span className="text-fg">{equipe.nome_capitao}</span></p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-display text-3xl font-bold text-ow-orange leading-none">{equipe.pontuacao_rank}</p>
-          <p className="text-fg-dim text-[10px] uppercase tracking-widest mt-1">pontos</p>
-          <p className="text-xs mt-2">
-            <span className="text-success font-semibold">{equipe.vitorias}V</span>
-            <span className="text-fg-dim"> · </span>
-            <span className="text-danger font-semibold">{equipe.derrotas}D</span>
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-4">
-        {equipe.jogadores.map((j, i) => {
-          const role = j.role?.toLowerCase() ?? "flex";
-          return (
-            <div key={i} className="bg-surface-2 border border-line rounded-lg p-3 flex flex-col items-center text-center">
-              <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider mb-2 ${ROLE_COLOR[role] ?? ROLE_COLOR.flex}`}>
-                {ROLE_ICON[role] && <img src={ROLE_ICON[role]} alt={role} className="w-5 h-5 object-contain" />}
-                {ROLE_LABEL[role] ?? role.toUpperCase()}
-              </span>
-              <p className="text-xs font-semibold truncate w-full font-mono">{j.battletag}</p>
-              <p className="text-[11px] text-fg-dim mt-0.5">{j.rank}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      {(equipe.horarios?.length > 0 || equipe.dias?.length > 0) && (
-        <div className="flex gap-1.5 flex-wrap pt-3 border-t border-line">
-          {equipe.horarios?.map((h) => (
-            <span key={h} className="bg-ow-orange/10 text-ow-orange border border-ow-orange/20 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-semibold">
-              {LABEL_HORARIO[h] ?? h}
-            </span>
-          ))}
-          {equipe.dias?.map((d) => (
-            <span key={d} className="bg-surface-2 text-fg-muted border border-line text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-semibold">
-              {LABEL_DIA[d] ?? d}
-            </span>
-          ))}
-        </div>
-      )}
-    </article>
-  );
-}
-
-// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function PublicoPage() {
   const [aba, setAba] = useState<Aba>("inicio");
-  const [subAba, setSubAba] = useState<"mata-mata" | "grupos">("mata-mata");
-  const [equipes, setEquipes] = useState<Equipe[]>([]);
-  const [partidas, setPartidas] = useState<Partida[]>([]);
-  const [grupos, setGrupos] = useState<Grupos>({});
+  const [subAbaRodada, setSubAbaRodada] = useState<string>("rodada1");
   const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState(false);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
-  const [buscaEquipe, setBuscaEquipe] = useState("");
-  const [ordemEquipes, setOrdemEquipes] = useState<OrdemEquipes>("pontuacao");
 
-  const buscarDados = useCallback(async (inicial = false) => {
-    if (inicial) setCarregando(true);
-    setErro(false);
-    try {
-      const [e, p, g] = await Promise.all([
-        fetch(`${API}/api/publico/equipes`).then((r) => { if (!r.ok) throw new Error(); return r.json(); }),
-        fetch(`${API}/api/publico/partidas`).then((r) => { if (!r.ok) throw new Error(); return r.json(); }),
-        fetch(`${API}/api/publico/grupos`).then((r) => { if (!r.ok) throw new Error(); return r.json(); }),
-      ]);
-      setEquipes(e);
-      setPartidas(p);
-      setGrupos(g);
-      setUltimaAtualizacao(new Date());
-    } catch {
-      if (inicial) setErro(true);
-    } finally {
-      if (inicial) setCarregando(false);
+  const [rodada1, setRodada1] = useState<MatchItem[]>([]);
+  const [rodada2, setRodada2] = useState<MatchItem[]>([]);
+  const [oitavas, setOitavas] = useState<MatchItem[]>([]);
+  const [quartas, setQuartas] = useState<MatchItem[]>([]);
+  const [semifinais, setSemifinais] = useState<MatchItem[]>([]);
+  const [grandeFinal, setGrandeFinal] = useState<MatchItem[]>([]);
+  const [podio, setPodio] = useState<PodioItem[]>([]);
+  const [participantes, setParticipantes] = useState<Participant[]>([]);
+
+  const parseCSV = (csvText: string) => {
+    if (!csvText) return;
+    const lines = csvText.split("\n").map(l => l.trim());
+
+    let parsedRodada1: MatchItem[] = [];
+    let parsedRodada2: MatchItem[] = [];
+    let parsedOitavas: MatchItem[] = [];
+    let parsedQuartas: MatchItem[] = [];
+    let parsedSemifinais: MatchItem[] = [];
+    let parsedFinal: MatchItem[] = [];
+    let parsedPodio: PodioItem[] = [];
+    let parsedPartes: Participant[] = [];
+
+    let currentSection = "";
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line) continue;
+
+      if (line.includes("Jogador A,BattleTag A,Plataforma A")) {
+        currentSection = "rodada1";
+        continue;
+      }
+      if (line.includes("2.ª RODADA")) {
+        currentSection = "rodada2";
+        i++;
+        continue;
+      }
+      if (line.includes("3.ª RODADA") || line.includes("OITAVAS DE FINAL")) {
+        currentSection = "oitavas";
+        i++;
+        continue;
+      }
+      if (line.includes("4.ª RODADA") || line.includes("QUARTAS DE FINAL")) {
+        currentSection = "quartas";
+        i++;
+        continue;
+      }
+      if (line.includes("5.ª RODADA") || line.includes("SEMIFINAIS")) {
+        currentSection = "semifinais";
+        i++;
+        continue;
+      }
+      if (line.includes("6.ª RODADA") || line.includes("GRANDE FINAL")) {
+        currentSection = "final";
+        i++;
+        continue;
+      }
+      if (line.includes("PÓDIO DOS CAMPEÕES")) {
+        currentSection = "podio";
+        i++;
+        continue;
+      }
+
+      const cols = parseCSVLine(line);
+
+      try {
+        if (currentSection === "rodada1" && cols.length >= 9 && cols[0] && cols[0] !== "Jogador A") {
+          const pA = cols[0] || "";
+          const btA = cols[1] || "";
+          const platA = cols[2] || "";
+          const scA = cols[3] || "—";
+          const scB = cols[4] || "—";
+          const pB = cols[5] || "";
+          const btB = cols[6] || "";
+          const platB = cols[7] || "";
+          const venc = cols[8] || "";
+
+          let hor = "";
+          for (let c = 9; c < cols.length; c++) {
+            if (cols[c] && cols[c].length > 0) {
+              hor = cols[c];
+              break;
+            }
+          }
+
+          parsedRodada1.push({
+            id: "",
+            fase: "1ª Rodada",
+            timeA: pA,
+            plataformaA: platA,
+            scoreA: scA,
+            timeB: pB,
+            plataformaB: platB,
+            scoreB: scB,
+            vencedor: venc,
+            status: venc ? "concluida" : "pendente",
+            horario: hor
+          });
+
+          if (pA) parsedPartes.push({ nome: pA, battletag: btA, plataforma: platA });
+          if (pB && pB !== "BYE") parsedPartes.push({ nome: pB, battletag: btB, plataforma: platB });
+        }
+
+        if (currentSection === "rodada2" && cols.length >= 10 && cols[0]?.startsWith("Jogo")) {
+          parsedRodada2.push({
+            id: cols[0] || "",
+            fase: "2ª Rodada",
+            timeA: cols[1] || "",
+            mainA: cols[2] || "",
+            plataformaA: cols[3] || "",
+            scoreA: cols[4] || "—",
+            scoreB: cols[5] || "—",
+            timeB: cols[6] || "",
+            mainB: cols[7] || "",
+            plataformaB: cols[8] || "",
+            vencedor: cols[9] || "",
+            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
+          });
+        }
+
+        if (currentSection === "oitavas" && cols.length >= 10 && (cols[0]?.startsWith("Oitavas") || cols[0]?.startsWith("Jogo"))) {
+          parsedOitavas.push({
+            id: cols[0] || "",
+            fase: "Oitavas de Final",
+            timeA: cols[1] || "",
+            mainA: cols[2] || "",
+            plataformaA: cols[3] || "",
+            scoreA: cols[4] || "—",
+            scoreB: cols[5] || "—",
+            timeB: cols[6] || "",
+            mainB: cols[7] || "",
+            plataformaB: cols[8] || "",
+            vencedor: cols[9] || "",
+            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
+          });
+        }
+
+        if (currentSection === "quartas" && cols.length >= 10 && cols[0]?.startsWith("Quartas")) {
+          parsedQuartas.push({
+            id: cols[0] || "",
+            fase: "Quartas de Final",
+            timeA: cols[1] || "",
+            mainA: cols[2] || "",
+            plataformaA: cols[3] || "",
+            scoreA: cols[4] || "—",
+            scoreB: cols[5] || "—",
+            timeB: cols[6] || "",
+            mainB: cols[7] || "",
+            plataformaB: cols[8] || "",
+            vencedor: cols[9] || "",
+            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
+          });
+        }
+
+        if (currentSection === "semifinais" && cols.length >= 10 && cols[0]?.startsWith("Semifinal")) {
+          parsedSemifinais.push({
+            id: cols[0] || "",
+            fase: "Semifinais",
+            timeA: cols[1] || "",
+            mainA: cols[2] || "",
+            plataformaA: cols[3] || "",
+            scoreA: cols[4] || "—",
+            scoreB: cols[5] || "—",
+            timeB: cols[6] || "",
+            mainB: cols[7] || "",
+            plataformaB: cols[8] || "",
+            vencedor: cols[9] || "",
+            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
+          });
+        }
+
+        if (currentSection === "final" && cols.length >= 10 && (cols[0]?.startsWith("Grande") || cols[0]?.includes("Final"))) {
+          parsedFinal.push({
+            id: cols[0] || "",
+            fase: "Grande Final",
+            timeA: cols[1] || "",
+            mainA: cols[2] || "",
+            plataformaA: cols[3] || "",
+            scoreA: cols[4] || "—",
+            scoreB: cols[5] || "—",
+            timeB: cols[6] || "",
+            mainB: cols[7] || "",
+            plataformaB: cols[8] || "",
+            vencedor: cols[9] || "",
+            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
+          });
+        }
+
+        if (currentSection === "podio" && cols.length >= 3 && cols[0]?.includes("Lugar")) {
+          parsedPodio.push({
+            posicao: cols[0] || "",
+            jogador: cols[1] || "A definir",
+            titulo: cols[2] || "",
+            medalha: cols[3] || ""
+          });
+        }
+      } catch (err) {
+        console.error("Error parsing line:", line, err);
+      }
     }
-  }, []);
 
-  useEffect(() => { buscarDados(true); }, [buscarDados]);
+    parsedRodada1.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
+    parsedRodada1 = parsedRodada1.map((m, idx) => ({
+      ...m,
+      id: `#${(idx + 1).toString().padStart(2, '0')}`
+    }));
+
+    setRodada1(parsedRodada1);
+    setRodada2(parsedRodada2);
+    setOitavas(parsedOitavas);
+    setQuartas(parsedQuartas);
+    setSemifinais(parsedSemifinais);
+    setGrandeFinal(parsedFinal);
+    setPodio(parsedPodio);
+    setParticipantes(parsedPartes);
+  };
 
   useEffect(() => {
-    const id = setInterval(() => buscarDados(false), POLLING_INTERVAL);
-    return () => clearInterval(id);
-  }, [buscarDados]);
+    parseCSV(FALLBACK_CSV);
+    setUltimaAtualizacao(new Date());
+    setCarregando(false);
 
-  const haoVivo = useMemo(() => partidas.some((p) => p.status === "em_andamento"), [partidas]);
-
-  const eliminatorias = useMemo(() => partidas.filter((p) => p.fase === "eliminatoria"), [partidas]);
-  const classificados = useMemo(() => eliminatorias.filter((p) => p.status === "concluida" || p.status === "bye").length, [eliminatorias]);
-
-  const equipesFiltradas = useMemo(() => {
-    let lista = [...equipes];
-    if (buscaEquipe.trim()) {
-      const q = buscaEquipe.toLowerCase();
-      lista = lista.filter((e) => e.nome.toLowerCase().includes(q) || e.nome_capitao.toLowerCase().includes(q));
+    async function loadLiveData() {
+      try {
+        const res = await fetch(SHEET_API_URL);
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.length > 50) {
+            parseCSV(text);
+            setUltimaAtualizacao(new Date());
+          }
+        }
+      } catch {
+        // Ignora falhas de rede e mantém o fallback
+      }
     }
-    if (ordemEquipes === "pontuacao") lista.sort((a, b) => b.pontuacao_rank - a.pontuacao_rank);
-    if (ordemEquipes === "nome")      lista.sort((a, b) => a.nome.localeCompare(b.nome));
-    if (ordemEquipes === "fase") {
-      const ordem: Record<string, number> = { eliminatoria: 0, inscrita: 1, eliminado: 2 };
-      lista.sort((a, b) => (ordem[a.fase_atual] ?? 1) - (ordem[b.fase_atual] ?? 1));
-    }
-    return lista;
-  }, [equipes, buscaEquipe, ordemEquipes]);
+    loadLiveData();
+  }, []);
 
   const abas: { id: Aba; label: string }[] = [
-    { id: "inicio",   label: "Início" },
-    { id: "equipes",  label: "Equipes" },
-    { id: "partidas", label: "Partidas" },
-    { id: "grupos",   label: "Classificação" },
+    { id: "inicio", label: "Início & Premiação" },
+    { id: "partidas", label: "Chaveamento & Partidas" },
+    { id: "podio", label: "Pódio" },
+    { id: "regras", label: "Regras" },
   ];
 
-  if (!carregando && erro) {
-    return (
-      <main className="min-h-screen flex items-center justify-center p-6 text-fg">
-        <div className="surface-card p-10 rounded-2xl text-center max-w-md border border-danger/30">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-danger/10 flex items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-7 h-7 text-danger">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
-            </svg>
-          </div>
-          <h2 className="text-display text-xl font-bold uppercase mb-2 text-fg">Sem conexão</h2>
-          <p className="text-fg-muted text-sm mb-6">Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.</p>
-          <button
-            onClick={() => buscarDados(true)}
-            className="bg-ow-orange text-background font-bold uppercase tracking-wider py-2.5 px-6 rounded-lg hover:bg-ow-orange-glow transition-colors text-sm"
-          >
-            Tentar novamente
-          </button>
-        </div>
-      </main>
-    );
-  }
+  const rodadasTabs = [
+    { id: "rodada1", label: "1ª Rodada", data: rodada1 },
+    { id: "rodada2", label: "2ª Rodada", data: rodada2 },
+    { id: "oitavas", label: "Oitavas", data: oitavas },
+    { id: "quartas", label: "Quartas", data: quartas },
+    { id: "semifinais", label: "Semifinais", data: semifinais },
+    { id: "final", label: "Grande Final", data: grandeFinal },
+  ];
 
-  const encerradasMM = eliminatorias.filter((p) => p.status === "concluida" || p.status === "bye");
-  const pendentesMM  = eliminatorias.filter((p) => p.status !== "concluida" && p.status !== "bye");
+  const rodadaAtualAtiva = rodadasTabs.find(r => r.id === subAbaRodada) || rodadasTabs[0];
 
   return (
     <main className="min-h-screen text-fg">
@@ -461,11 +543,11 @@ export default function PublicoPage() {
               <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 0 1-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
             </svg>
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-ow-orange/90 font-semibold">Temporada 1 · Ao vivo</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-ow-orange/90 font-semibold">Torneio Oficial · Akira</p>
               <h1 className="text-display text-4xl md:text-5xl font-bold uppercase leading-none mt-1">
-                Overwatch <span className="text-ow-orange">Stadium</span>
+                Duel<span className="text-ow-orange">owach</span>
               </h1>
-              <p className="text-fg-muted text-sm mt-2">Acompanhamento oficial de equipes, partidas e classificação.</p>
+              <p className="text-fg-muted text-sm mt-2">Acompanhe o chaveamento ao vivo sincronizado com a planilha oficial.</p>
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
@@ -474,27 +556,22 @@ export default function PublicoPage() {
                 Atualizado às {ultimaAtualizacao.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
             )}
-            {haoVivo && (
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-danger/15 border border-danger/30 text-danger text-xs font-bold uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-danger live-dot" />
-                Partida ao vivo
-              </span>
-            )}
-            <a href="/?login=true" className="text-sm font-semibold text-ow-blue hover:text-ow-blue-glow transition-colors border border-ow-blue/30 hover:border-ow-blue-glow/60 px-4 py-2 rounded-lg">
-              Área restrita →
-            </a>
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/15 border border-success/30 text-success text-xs font-bold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              Ao Vivo da Planilha
+            </span>
           </div>
         </div>
       </header>
 
       {/* Abas */}
-      <nav className="border-b border-line bg-surface/40 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 md:px-8 flex gap-1">
+      <nav className="border-b border-line bg-surface/95 backdrop-blur-md sticky top-0 z-50 shadow-md">
+        <div className="max-w-6xl mx-auto px-6 md:px-8 flex justify-center gap-2">
           {abas.map((a) => (
             <button
               key={a.id}
               onClick={() => setAba(a.id)}
-              className={`relative px-5 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${aba === a.id ? "text-fg" : "text-fg-muted hover:text-fg"}`}
+              className={`relative px-6 py-4 text-sm font-semibold uppercase tracking-wider transition-colors ${aba === a.id ? "text-fg" : "text-fg-muted hover:text-fg"}`}
             >
               {a.label}
               <span className={`absolute left-3 right-3 -bottom-px h-[3px] rounded-t-full transition-all ${aba === a.id ? "bg-ow-orange shadow-[0_0_12px_var(--ow-orange-glow)]" : "bg-transparent"}`} />
@@ -512,215 +589,197 @@ export default function PublicoPage() {
           </div>
         ) : (
           <>
-            {/* INÍCIO */}
+            {/* INÍCIO & PREMIAÇÃO */}
             {aba === "inicio" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <section className="surface-card rounded-2xl p-8 md:p-12 text-center relative overflow-hidden border border-line-strong">
-                  <div className="absolute inset-0 hero-grad opacity-30 pointer-events-none" />
+                {/* Hero Card / Banner */}
+                <section className="relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
+                  <div className="absolute inset-0 hero-grad opacity-40 pointer-events-none" />
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-ow-orange/10 blur-[80px] pointer-events-none" />
+
                   <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-                    <div className="w-16 h-16 mx-auto bg-ow-orange/10 rounded-full flex items-center justify-center mb-2">
-                      <svg viewBox="0 0 48 48" fill="none" className="w-10 h-10">
-                        <path fill="#F99E1A" d="M13.9 13.901a14.284 14.284 0 0 1 20.2 0l4.043-4.042a20 20 0 0 0-28.286 0z" />
-                        <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 0 1-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
-                      </svg>
-                    </div>
-                    <h2 className="text-display text-3xl md:text-4xl font-bold uppercase">
-                      Bem-vindo ao Overwatch <span className="text-ow-orange">Stadium</span>
+                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ow-orange/15 border border-ow-orange/40 text-ow-orange text-xs font-bold uppercase tracking-[0.25em]">
+                      ⚔️ Torneio 1v1 Exclusivo · Organizado por Akira
+                    </span>
+
+                    <h2 className="text-display text-4xl md:text-6xl font-bold uppercase tracking-wide">
+                      Bem-vindo ao <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Duelowach</span>
                     </h2>
-                    <p className="text-fg-muted md:text-lg leading-relaxed">
-                      O Overwatch Stadium é o campeonato perfeito para você testar suas habilidades e subir de nível no cenário competitivo. Focado em promover o equilíbrio e a diversão, o torneio tem um limite máximo de rank estabelecido em{" "}
-                      <strong className="text-ow-orange font-bold px-1">Mestre 1</strong>.
+
+                    <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
+                      Duelos intensos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3) com os mains de cada jogador e desempate com herói secreto e aleatório.
                     </p>
-                    <p className="text-fg md:text-xl font-display font-semibold uppercase tracking-wider pt-2">
-                      Reúna seus amigos, treine suas composições e venha disputar a glória!
-                    </p>
-                    <div className="pt-6">
-                      <a
-                        href="https://docs.google.com/forms/d/e/1FAIpQLSfWb3zc0hUqFKfRqheGgRT1waY3QP1aako2LHAQcrlbUTNTVg/viewform?usp=header"
-                        target="_blank" rel="noopener noreferrer"
-                        className="inline-block bg-ow-orange text-background font-bold uppercase tracking-wider py-4 px-8 rounded-xl hover:bg-ow-orange-glow hover:-translate-y-1 hover:shadow-[0_15px_40px_-15px_rgba(249,158,26,0.6)] transition-all duration-300"
-                      >
-                        Inscrever Minha Equipe →
-                      </a>
+
+                    {/* Premiação Destaque */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
+                      <div className="surface-card p-6 border-2 border-ow-orange rounded-2xl relative overflow-hidden bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:scale-[1.02] transition-transform">
+                        <div className="absolute top-0 right-0 bg-ow-orange text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                          1º Lugar
+                        </div>
+                        <div className="text-5xl mb-3">🥇</div>
+                        <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-1">Grande Campeão</h3>
+                        <p className="text-fg font-bold text-lg">1º Bundle Le Sserafim</p>
+                      </div>
+
+                      <div className="surface-card p-6 border-2 border-line-strong rounded-2xl relative overflow-hidden bg-gradient-to-br from-surface-2 via-surface to-surface hover:scale-[1.02] transition-transform shadow-lg">
+                        <div className="absolute top-0 right-0 bg-fg-muted text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                          2º Lugar
+                        </div>
+                        <div className="text-5xl mb-3">🥈</div>
+                        <h3 className="text-display text-xl font-bold uppercase text-fg mb-1">Vice-Campeão</h3>
+                        <p className="text-fg font-bold text-lg">Arma Mítica da Sojourn</p>
+                      </div>
                     </div>
                   </div>
                 </section>
 
+                {/* Transmissão do Akira */}
                 <section>
                   <h2 className="text-display text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
-                    <span className="text-ow-orange">✦</span> Transmissões Oficiais
+                    <span className="text-ow-orange">✦</span> Transmissão Oficial
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-5">
-                    {[{ canal: "akiralegacy", nome: "AkiraLegacy" }, { canal: "foythtv", nome: "FoythTV" }, { canal: "violetkill", nome: "VioletKill" }].map((s) => (
-                      <div key={s.canal} className="flex flex-col gap-3">
-                        <div className="flex items-center gap-2 px-1">
-                          <span className="w-2.5 h-2.5 rounded-full bg-danger live-dot" />
-                          <h3 className="text-display text-lg font-bold uppercase tracking-wider text-fg">{s.nome}</h3>
-                        </div>
-                        <div className="aspect-video bg-surface-2 rounded-xl overflow-hidden border border-line-strong shadow-lg hover:border-ow-orange/50 transition-colors">
-                          <iframe
-                            src={`https://player.twitch.tv/?channel=${s.canal}&parent=localhost&parent=web-production-aeb1b.up.railway.app&parent=overwatch-stadium-web.vercel.app`}
-                            height="100%" width="100%" allowFullScreen className="border-none"
-                          />
-                        </div>
-                      </div>
-                    ))}
+                  <div className="max-w-2xl mx-auto">
+                    <div className="flex items-center gap-2 px-1 mb-3">
+                      <span className="w-3 h-3 rounded-full bg-danger live-dot animate-ping" />
+                      <h3 className="text-display text-xl font-bold uppercase tracking-wider text-fg">AkiraLegacy</h3>
+                    </div>
+                    <div className="aspect-video bg-surface-2 rounded-2xl overflow-hidden border border-line-strong shadow-2xl">
+                      <iframe
+                        src="https://player.twitch.tv/?channel=akiralegacy&parent=localhost&parent=web-production-aeb1b.up.railway.app&parent=overwatch-stadium-web.vercel.app"
+                        height="100%" width="100%" allowFullScreen className="border-none"
+                      />
+                    </div>
                   </div>
                 </section>
               </div>
             )}
 
-            {/* EQUIPES */}
-            {aba === "equipes" && (
-              <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="text"
-                    placeholder="Buscar equipe ou capitão..."
-                    value={buscaEquipe}
-                    onChange={(e) => setBuscaEquipe(e.target.value)}
-                    className="flex-1 px-4 py-2.5 bg-surface border border-line-strong rounded-lg text-fg text-sm focus:outline-none focus:border-ow-orange transition-colors placeholder:text-fg-dim"
-                  />
-                  <div className="flex gap-2">
-                    {(["pontuacao", "nome", "fase"] as OrdemEquipes[]).map((o) => (
-                      <button
-                        key={o}
-                        onClick={() => setOrdemEquipes(o)}
-                        className={`px-3 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border transition-colors ${
-                          ordemEquipes === o
-                            ? "bg-ow-orange/15 border-ow-orange/40 text-ow-orange"
-                            : "bg-surface border-line text-fg-muted hover:text-fg hover:border-line-strong"
-                        }`}
-                      >
-                        {o === "pontuacao" ? "Pontos" : o === "nome" ? "A–Z" : "Fase"}
-                      </button>
-                    ))}
-                  </div>
+            {/* PARTIDAS E CHAVEAMENTO */}
+            {aba === "partidas" && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="text-center max-w-xl mx-auto">
+                  <h2 className="text-display text-3xl font-bold uppercase tracking-wider">Chaveamento Oficial</h2>
+                  <p className="text-fg-muted text-sm mt-1">Confrontos organizados cronologicamente por horário.</p>
                 </div>
 
-                <p className="text-[10px] uppercase tracking-widest text-fg-dim px-1">
-                  {equipesFiltradas.length} de {equipes.length} equipes
-                  {eliminatorias.length > 0 && (
-                    <span className="ml-3 text-success">· {classificados}/{eliminatorias.length} classificados</span>
-                  )}
-                </p>
-
-                {equipesFiltradas.length === 0 ? (
-                  <div className="surface-card p-10 text-center rounded-2xl border border-line-strong">
-                    <p className="text-fg-muted text-sm">Nenhuma equipe encontrada para "{buscaEquipe}".</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-4">
-                    {equipesFiltradas.map((equipe) => <CardEquipe key={equipe.id} equipe={equipe} />)}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* PARTIDAS */}
-            {aba === "partidas" && (
-              <div className="grid gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {partidas.length === 0 ? (
-                  <p className="text-fg-muted">Nenhuma partida registrada ainda.</p>
-                ) : (
-                  partidas.map((p) => <CardPartida key={p.id} p={p} />)
-                )}
-              </div>
-            )}
-
-            {/* CLASSIFICAÇÃO */}
-            {aba === "grupos" && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex gap-1 border-b border-line">
-                  {(["mata-mata", "grupos"] as const).map((s) => (
+                {/* Sub-abas de Rodadas */}
+                <div className="flex gap-2 flex-wrap justify-center">
+                  {rodadasTabs.map((r) => (
                     <button
-                      key={s}
-                      onClick={() => setSubAba(s)}
-                      className={`relative px-5 py-3 text-sm font-semibold uppercase tracking-wider transition-colors ${subAba === s ? "text-fg" : "text-fg-muted hover:text-fg"}`}
+                      key={r.id}
+                      onClick={() => setSubAbaRodada(r.id)}
+                      className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all ${
+                        subAbaRodada === r.id
+                          ? "bg-ow-orange text-background border-ow-orange shadow-[0_0_15px_rgba(249,158,26,0.4)]"
+                          : "surface-card text-fg-muted hover:text-fg border-line"
+                      }`}
                     >
-                      {s === "mata-mata" ? "Mata-mata" : "Fase de Grupos"}
-                      <span className={`absolute left-3 right-3 -bottom-px h-[3px] rounded-t-full transition-all ${subAba === s ? "bg-ow-orange shadow-[0_0_12px_var(--ow-orange-glow)]" : "bg-transparent"}`} />
+                      {r.label} ({r.data.length})
                     </button>
                   ))}
                 </div>
 
-                {subAba === "mata-mata" && (
-                  eliminatorias.length === 0 ? (
-                    <div className="surface-card rounded-2xl p-12 text-center border border-line-strong">
-                      <p className="text-fg-muted uppercase tracking-wider text-sm font-semibold">Mata-mata ainda não iniciado.</p>
+                {/* Exibição da Rodada Ativa */}
+                <section className="space-y-4 pt-2">
+                  <h3 className="text-display text-xl font-bold uppercase text-ow-orange border-b border-line pb-2 flex items-center justify-between">
+                    <span>{rodadaAtualAtiva.label}</span>
+                    <span className="text-xs font-normal text-fg-dim font-mono">{rodadaAtualAtiva.data.length} confrontos ordenados</span>
+                  </h3>
+                  {rodadaAtualAtiva.data.length === 0 ? (
+                    <div className="surface-card p-12 text-center rounded-2xl border border-line-strong">
+                      <p className="text-fg-muted uppercase tracking-wider text-sm font-semibold">Nenhuma partida cadastrada para esta rodada ainda.</p>
                     </div>
                   ) : (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-3 gap-3">
-                        {[
-                          { val: eliminatorias.length, label: "Confrontos" },
-                          { val: encerradasMM.length,  label: "Finalizados", color: "text-success" },
-                          { val: pendentesMM.length,   label: "Pendentes",   color: "text-warning" },
-                        ].map(({ val, label, color }) => (
-                          <div key={label} className="surface-card p-4 text-center">
-                            <p className={`text-display text-2xl font-bold ${color ?? "text-fg"}`}>{val}</p>
-                            <p className="text-[10px] uppercase tracking-widest text-fg-dim mt-1">{label}</p>
-                          </div>
-                        ))}
-                      </div>
-                      {encerradasMM.length > 0 && (
-                        <section className="space-y-2">
-                          <h3 className="text-[10px] uppercase tracking-[0.2em] text-fg-dim font-semibold px-1">Encerrados ({encerradasMM.length})</h3>
-                          {encerradasMM.map((p) => <CardMataMata key={p.id} p={p} />)}
-                        </section>
-                      )}
-                      {pendentesMM.length > 0 && (
-                        <section className="space-y-2">
-                          <h3 className="text-[10px] uppercase tracking-[0.2em] text-fg-dim font-semibold px-1">Aguardando ({pendentesMM.length})</h3>
-                          {pendentesMM.map((p) => <CardMataMata key={p.id} p={p} />)}
-                        </section>
-                      )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {rodadaAtualAtiva.data.map((m) => (
+                        <CardConfronto key={m.id} m={m} />
+                      ))}
                     </div>
-                  )
-                )}
+                  )}
+                </section>
+              </div>
+            )}
 
-                {subAba === "grupos" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {Object.keys(grupos).length === 0 ? (
-                      <div className="surface-card rounded-2xl p-12 text-center border border-line-strong md:col-span-2">
-                        <p className="text-fg-muted uppercase tracking-wider text-sm font-semibold">Fase de grupos ainda não iniciada.</p>
+            {/* PÓDIO */}
+            {aba === "podio" && (
+              <div className="space-y-8 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="text-center">
+                  <h2 className="text-display text-3xl font-bold uppercase tracking-wider">Pódio do Torneio</h2>
+                  <p className="text-fg-muted text-sm mt-1">Os vencedores oficiais atualizados na planilha.</p>
+                </div>
+
+                <div className="grid gap-4">
+                  {podio.map((p, i) => (
+                    <div key={i} className="surface-card p-6 flex items-center justify-between border border-line-strong">
+                      <div className="flex items-center gap-4">
+                        <span className="text-3xl">
+                          {p.posicao.includes("1º") ? "🥇" : p.posicao.includes("2º") ? "🥈" : "🥉"}
+                        </span>
+                        <div>
+                          <p className="text-xs uppercase tracking-widest text-ow-orange font-bold">{p.posicao} — {p.titulo}</p>
+                          <h3 className="text-display text-2xl font-bold uppercase text-fg mt-0.5">{p.jogador}</h3>
+                        </div>
                       </div>
-                    ) : (
-                      Object.entries(grupos).map(([grupo, equipes]) => (
-                        <article key={grupo} className="surface-card p-5">
-                          <header className="flex items-center justify-between mb-4">
-                            <h2 className="text-display text-lg font-bold uppercase tracking-wider">
-                              Grupo <span className="text-ow-orange">{grupo}</span>
-                            </h2>
-                            <span className="text-[10px] uppercase tracking-widest text-fg-dim">{equipes.length} equipes</span>
-                          </header>
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="text-fg-dim text-[10px] uppercase tracking-widest border-b border-line">
-                                <th className="text-left py-2 font-semibold">#</th>
-                                <th className="text-left py-2 font-semibold">Equipe</th>
-                                <th className="text-center py-2 font-semibold">V</th>
-                                <th className="text-center py-2 font-semibold">D</th>
-                                <th className="text-center py-2 font-semibold">Saldo</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {equipes.map((e, i) => (
-                                <tr key={i} className={`border-b border-line/60 last:border-0 ${i === 0 ? "bg-ow-orange/5" : ""}`}>
-                                  <td className={`py-2.5 font-display font-bold ${i === 0 ? "text-ow-orange" : "text-fg-dim"}`}>{i + 1}</td>
-                                  <td className="py-2.5 font-semibold text-fg">{e.nome}</td>
-                                  <td className="py-2.5 text-center text-success font-semibold tabular-nums">{e.vitorias}</td>
-                                  <td className="py-2.5 text-center text-danger font-semibold tabular-nums">{e.derrotas}</td>
-                                  <td className="py-2.5 text-center text-fg-muted tabular-nums">{e.saldo_mapas}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </article>
-                      ))
-                    )}
+                      <span className="text-xs font-semibold px-3 py-1 bg-surface-2 rounded-lg text-fg-muted">
+                        {p.medalha}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* REGRAS */}
+            {aba === "regras" && (
+              <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="text-center">
+                  <h2 className="text-display text-3xl font-bold uppercase tracking-wider">Regras do Duelowach</h2>
+                  <p className="text-fg-muted text-sm mt-1">Entenda o formato e a dinâmica da competição.</p>
+                </div>
+
+                <div className="grid gap-4">
+                  <div className="surface-card p-6 space-y-2">
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">⚔️ Formato: Ganhou, Passou</h3>
+                    <p className="text-fg-muted text-sm leading-relaxed">
+                      Torneio eliminatório. Quem vencer a série avança para a próxima fase. Quem perder está eliminado da competição principal.
+                    </p>
                   </div>
-                )}
+
+                  <div className="surface-card p-6 space-y-2">
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">📞 Canal de Voz & Regra de W.O.</h3>
+                    <p className="text-fg-muted text-sm leading-relaxed">
+                      Os participantes devem estar no canal de voz <strong>(ME PUXE)</strong> com pelo menos <strong>5 minutos de antecedência</strong> da partida. Tolerância máxima de <strong>5 minutos</strong>; ausência resulta em <strong>W.O.</strong>
+                    </p>
+                  </div>
+
+                  <div className="surface-card p-6 space-y-2">
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">⏱️ Duração das Partidas</h3>
+                    <p className="text-fg-muted text-sm leading-relaxed">
+                      Cada partida tem duração prevista de 10 minutos. As regras são reforçadas a cada partida para os participantes.
+                    </p>
+                  </div>
+
+                  <div className="surface-card p-6 space-y-2">
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎮 Partidas em MD3 & Main vs Main</h3>
+                    <p className="text-fg-muted text-sm leading-relaxed">
+                      Todas as partidas são disputadas em **Melhor de 3 (MD3)**. Cada participante joga com seu próprio main (ex: Genji vs Genji, Cassidy vs Cassidy).
+                    </p>
+                  </div>
+
+                  <div className="surface-card p-6 space-y-2">
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎲 Desempate</h3>
+                    <p className="text-fg-muted text-sm leading-relaxed">
+                      Em caso de empate ou necessidade de desempate na série, será utilizado um **herói secreto e aleatório** sorteado para ambos os jogadores.
+                    </p>
+                  </div>
+
+                  <div className="surface-card p-6 space-y-2">
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🔒 Regra dos Mains</h3>
+                    <p className="text-fg-muted text-sm leading-relaxed">
+                      Os mains dos jogadores nas fases avançadas só são revelados após a primeira parte do torneio, conforme atualização na planilha oficial.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </>
