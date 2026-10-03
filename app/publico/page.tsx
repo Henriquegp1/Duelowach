@@ -30,9 +30,9 @@ RheaTracy,RheaTracy #1864,PC,,,XSaTurn0,XSaTurn0#1164,XBOX Series S/X,,"Sábado,
 Viøłet,Viøłet#2832,PlayStation 4,,,CAFEINADO,Cafeinado#21268,PlayStation 4,,"Sábado, 21:50h",
 yoshiki,luesancar#1517,Xbox,,,WindExile - André,Wind#1464,PC,,"Sábado, 22:00h",
 Salomao2026,Salomao2021 #1712,PC,0,0,BlackWolf,BlackWolf#14881,XBOX One (Normal ou S),Empate,"Sexta-feira, 19:30h",
-GYta,GYTA#21353,PlayStadion 5,,,dani02908,DANI02908#1120,PC,,"Sábado, 19:40h",
-chicobento,chicobento #21209,PC,,,Wilkher02,Wilkher02#2666 ,PlayStadion 5,,"Sábado, 19:50h",
-JUNDERZ,JUNDER#1325,PC,,,Alewoja,Alewoja#1608,XBOX Series S/X,,"Sábado, 20:00h",
+GYta,GYTA#21353,PlayStadion 5,,,dani02908,DANI02908#1120,PC,,"Sexta-feira, 19:40h",
+chicobento,chicobento #21209,PC,,,Wilkher02,Wilkher02#2666 ,PlayStadion 5,,"Sexta-feira, 19:50h",
+JUNDERZ,JUNDER#1325,PC,,,Alewoja,Alewoja#1608,XBOX Series S/X,,"Sexta-feira, 20:00h",
 Salomao2021,Salomao2021 #1712,PC,,,Maria eduarda,Twilight#13390,XBOX One (Normal ou S),,"Sexta-feira, 20:10h",
 C4BRAL,C4bral #1499,PC,,,GAB3,GaB3 #21760,PC,,"Sexta-feira, 20:20h",
 Sivil,Sivil#11412,PC,,,Fussy,Fussy#21790,PC,,"Sexta-feira, 20:30h",
@@ -170,11 +170,24 @@ function parseHorarioToMinutes(horarioStr: string): number {
   return dayVal;
 }
 
+function checkIsWO(horarioStr?: string, status?: string, vencedor?: string): boolean {
+  if (!horarioStr || status === "concluida" || vencedor) return false;
+  const lower = horarioStr.toLowerCase();
+  const match = lower.match(/(\d{1,2}):(\d{2})/);
+  if (!match) return false;
+
+  const hours = parseInt(match[1], 10);
+  const mins = parseInt(match[2], 10);
+
+  const matchDate = new Date(2026, 9, 3, hours, mins, 0).getTime();
+  const now = Date.now();
+  return now > matchDate + 60 * 60 * 1000;
+}
+
 function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
 
   useEffect(() => {
-    // Alvo ajustado exatamente para sábado, 3 de outubro de 2026 às 19:30h
     const targetDate = new Date("2026-10-03T19:30:00").getTime();
 
     const interval = setInterval(() => {
@@ -212,6 +225,7 @@ function CountdownTimer() {
 
 function CardConfronto({ m }: { m: MatchItem }) {
   const concluida = m.status === "concluida" || m.vencedor !== "";
+  const isWO = checkIsWO(m.horario, m.status, m.vencedor);
   const isBye = m.timeB === "BYE";
 
   return (
@@ -306,9 +320,10 @@ function CardConfronto({ m }: { m: MatchItem }) {
       {/* Footer Status */}
       <div className="flex items-center justify-between px-5 py-3 bg-surface-2 border-t border-line">
         <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
+          isWO ? "bg-danger/20 text-danger border-danger/40 animate-pulse" :
           concluida ? "bg-success/15 text-success border-success/30" : "bg-surface-2 text-fg-muted border-line"
         }`}>
-          {concluida ? "Encerrado" : "Aguardando"}
+          {isWO ? "⚠️ W.O. Aplicado (Atrasado +1h)" : concluida ? "Encerrado" : "Aguardando"}
         </span>
         {concluida && m.vencedor && (
           <span className="text-xs text-fg-dim">
@@ -624,6 +639,9 @@ export default function PublicoPage() {
     return true;
   });
 
+  // A partir da 2ª rodada, exibir em formato de listagem (1 coluna) em vez de grade de 2 colunas
+  const isRodadaListagem = subAbaRodada !== "rodada1";
+
   return (
     <main className="min-h-screen text-fg">
       {/* Hero */}
@@ -633,7 +651,7 @@ export default function PublicoPage() {
           <div className="flex items-center gap-4">
             <svg viewBox="0 0 48 48" fill="none" className="w-16 h-16 shrink-0 drop-shadow-[0_0_15px_rgba(249,158,26,0.4)]">
               <path fill="#F99E1A" d="M13.9 13.901a14.284 14.284 0 0 1 20.2 0l4.043-4.042a20 20 0 0 0-28.286 0z" />
-              <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 01-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
+              <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 0 1-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
             </svg>
             <div>
               <p className="text-xs uppercase tracking-[0.25em] text-ow-orange/90 font-semibold">Torneio Oficial · Akira</p>
@@ -821,7 +839,7 @@ export default function PublicoPage() {
                       <p className="text-fg-muted uppercase tracking-wider text-sm font-semibold">Nenhuma partida encontrada com este filtro.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={isRodadaListagem ? "grid grid-cols-1 gap-4 max-w-3xl mx-auto" : "grid grid-cols-1 md:grid-cols-2 gap-6"}>
                       {partidasFiltradas.map((m) => (
                         <div key={m.id} onClick={(e) => {
                           const target = e.target as HTMLElement;
