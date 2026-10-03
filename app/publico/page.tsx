@@ -174,8 +174,8 @@ function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
 
   useEffect(() => {
-    // Alvo ajustado para este sábado, 4 de outubro de 2026 às 19:30h
-    const targetDate = new Date("2026-10-04T19:30:00").getTime();
+    // Alvo ajustado exatamente para sábado, 3 de outubro de 2026 às 19:30h
+    const targetDate = new Date("2026-10-03T19:30:00").getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -633,7 +633,7 @@ export default function PublicoPage() {
           <div className="flex items-center gap-4">
             <svg viewBox="0 0 48 48" fill="none" className="w-16 h-16 shrink-0 drop-shadow-[0_0_15px_rgba(249,158,26,0.4)]">
               <path fill="#F99E1A" d="M13.9 13.901a14.284 14.284 0 0 1 20.2 0l4.043-4.042a20 20 0 0 0-28.286 0z" />
-              <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 0 1-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
+              <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 01-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
             </svg>
             <div>
               <p className="text-xs uppercase tracking-[0.25em] text-ow-orange/90 font-semibold">Torneio Oficial · Akira</p>
@@ -738,7 +738,7 @@ export default function PublicoPage() {
                 {/* CARD 2: Standalone Countdown Timer (Somente a Contagem) */}
                 <section className="surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 max-w-3xl mx-auto">
                   <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
-                    <span>🕒</span> Início do Torneio (Sábado, 4 de Outubro às 19:30h)
+                    <span>🕒</span> Início do Torneio (Sábado, 3 de Outubro às 19:30h)
                   </h3>
                   <CountdownTimer />
                 </section>
@@ -984,7 +984,7 @@ export default function PublicoPage() {
               </button>
             </div>
 
-        <div className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-2xl font-bold text-background shadow-lg" style={{ background: "var(--grad-blue)" }}>
+            <div className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-2xl font-bold text-background shadow-lg" style={{ background: "var(--grad-blue)" }}>
               {jogadorPerfil.nome.substring(0, 2).toUpperCase()}
             </div>
 
