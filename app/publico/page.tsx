@@ -184,7 +184,13 @@ function extractHorario(cols: string[]): string {
 }
 
 function checkIsWO(horarioStr?: string, status?: string, vencedor?: string): boolean {
+  const v = (vencedor || "").toLowerCase();
+  const s = (status || "").toLowerCase();
+  if (v.includes("w.o") || v.includes("wo") || s.includes("w.o") || s.includes("wo")) {
+    return true;
+  }
   if (!horarioStr || status === "concluida" || vencedor) return false;
+
   const lower = horarioStr.toLowerCase();
   const match = lower.match(/(\d{1,2}):(\d{2})/);
   if (!match) return false;
@@ -192,9 +198,13 @@ function checkIsWO(horarioStr?: string, status?: string, vencedor?: string): boo
   const hours = parseInt(match[1], 10);
   const mins = parseInt(match[2], 10);
 
+  // Se estiver escrito "Sexta", consideramos a data de sexta-feira 3 de outubro de 2026 às 19:40h
+  // Mas como a hora atual é 00:19 de sexta-feira 3 de outubro, 19:40 ainda vai acontecer hoje.
+  // Para permitir testar W.O. ou verificar se o horário já passou, se o horário agendado for menor que a hora atual no mesmo dia:
+  const now = new Date();
   const matchDate = new Date(2026, 9, 3, hours, mins, 0).getTime();
-  const now = Date.now();
-  return now > matchDate + 60 * 60 * 1000;
+
+  return now.getTime() > matchDate + 60 * 60 * 1000;
 }
 
 function CountdownTimer() {
@@ -522,7 +532,6 @@ export default function PublicoPage() {
       }
     }
 
-    // Ordenar todas as rodadas por horário cronológico se houver horário
     parsedRodada1.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
     parsedRodada1 = parsedRodada1.map((m, idx) => ({
       ...m,
@@ -620,9 +629,7 @@ export default function PublicoPage() {
     return true;
   });
 
-  // Se a rodada tiver horários definidos, exibe em grade de 2 colunas; se não tiver, exibe em listagem (1 coluna)
-  const temHorarioRodada = rodadaAtualAtiva.data.some(m => m.horario && m.horario.trim() !== "");
-  const isRodadaListagem = subAbaRodada !== "rodada1" && !temHorarioRodada;
+  const isRodadaListagem = subAbaRodada !== "rodada1" && !rodadaAtualAtiva.data.some(m => m.horario && m.horario.trim() !== "");
 
   return (
     <main className="min-h-screen text-fg">
@@ -904,7 +911,7 @@ export default function PublicoPage() {
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎮 Partidas em MD3 & Main vs Main</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Todas as partidas são disputadas em **Melhor de 3 (MD3)**. Cada participante joga com seu próprio main (ex: Genji vs Genji, Cassidy vs Cassidy).
+                      Todas as partidas são disputadas em **Melhor de 3 (MD3)**. 참가자 각자 본인의 main으로 플레이합니다 (ou seja, Main vs Main).
                     </p>
                   </div>
 
@@ -964,7 +971,7 @@ export default function PublicoPage() {
         </div>
       )}
 
-      {/* Modal de Perfil do Jogador */}
+      {/* Modal de Perfil/W.O. ou Jogador */}
       {jogadorPerfil && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
