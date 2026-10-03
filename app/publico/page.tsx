@@ -184,7 +184,6 @@ function extractHorario(cols: string[]): string {
 }
 
 function checkIsWO(horarioStr?: string, status?: string, vencedor?: string, scoreA?: string, scoreB?: string): boolean {
-  // Se já tem vencedor ou pontuação preenchida, NUNCA é W.O.
   if (status === "concluida" || (vencedor && vencedor.trim() !== "" && vencedor !== "—")) return false;
   if (scoreA && scoreA !== "—" && scoreA !== "" && scoreB && scoreB !== "—" && scoreB !== "") return false;
 
@@ -230,16 +229,16 @@ function CountdownTimer() {
   }, []);
 
   return (
-    <div className="flex justify-center gap-3 md:gap-4 my-2">
+    <div className="flex justify-center gap-2 md:gap-4 my-2">
       {[
         { label: "Dias", val: timeLeft.dias },
         { label: "Horas", val: timeLeft.horas },
         { label: "Minutos", val: timeLeft.minutos },
         { label: "Segundos", val: timeLeft.segundos },
       ].map((item, idx) => (
-        <div key={idx} className="surface-card px-4 py-3 rounded-xl border border-ow-orange/45 bg-surface-2 text-center min-w-[75px] shadow-md">
-          <span className="text-display text-2xl md:text-3xl font-bold text-ow-orange tabular-nums block">{String(item.val).padStart(2, "0")}</span>
-          <span className="text-[10px] text-fg-dim uppercase tracking-widest">{item.label}</span>
+        <div key={idx} className="surface-card px-3 md:px-4 py-2 md:py-3 rounded-xl border border-ow-orange/45 bg-surface-2 text-center min-w-[60px] md:min-w-[75px] shadow-md">
+          <span className="text-display text-xl md:text-3xl font-bold text-ow-orange tabular-nums block">{String(item.val).padStart(2, "0")}</span>
+          <span className="text-[9px] md:text-[10px] text-fg-dim uppercase tracking-widest">{item.label}</span>
         </div>
       ))}
     </div>
@@ -253,13 +252,15 @@ function CardConfronto({ m }: { m: MatchItem }) {
 
   return (
     <article className="surface-card p-0 overflow-hidden border border-line-strong hover:border-ow-orange/50 transition-all duration-300 shadow-xl rounded-2xl mb-4">
-      <div className="flex items-stretch">
+      <div className="flex flex-col sm:flex-row items-stretch">
         {/* ID / Duelo e Horário Destacado */}
-        <div className="flex flex-col items-center justify-center min-w-[105px] bg-surface-2 border-r border-line px-3 py-4 text-center">
-          <span className="text-[10px] text-fg-dim uppercase tracking-widest font-semibold">Duelo</span>
-          <span className="text-sm font-bold text-ow-orange font-mono uppercase mt-0.5">{m.id}</span>
+        <div className="flex flex-row sm:flex-col items-center justify-between sm:justify-center min-w-[100px] bg-surface-2 border-b sm:border-b-0 sm:border-r border-line px-4 py-3 sm:py-4 text-center">
+          <div>
+            <span className="text-[10px] text-fg-dim uppercase tracking-widest font-semibold block sm:inline">Duelo </span>
+            <span className="text-sm font-bold text-ow-orange font-mono uppercase mt-0.5">{m.id}</span>
+          </div>
           {m.horario && m.horario !== "" && (
-            <span className="text-[10px] font-bold text-ow-orange bg-ow-orange/15 px-2.5 py-1 rounded-md border border-ow-orange/30 mt-2.5 whitespace-nowrap shadow-sm">
+            <span className="text-[10px] font-bold text-ow-orange bg-ow-orange/15 px-2.5 py-1 rounded-md border border-ow-orange/30 sm:mt-2.5 whitespace-nowrap shadow-sm">
               🕐 {m.horario}
             </span>
           )}
@@ -272,76 +273,76 @@ function CardConfronto({ m }: { m: MatchItem }) {
             data-player={m.timeA}
             data-bt={m.battletagA}
             data-plat={m.plataformaA}
-            className={`flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
+            className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
               ${concluida && m.vencedor === m.timeA ? "bg-success/15" : ""}
               ${concluida && m.vencedor !== m.timeA && m.vencedor !== "" && m.vencedor !== "—" && !isBye ? "opacity-40" : ""}
             `}
           >
-            <div className="flex items-center gap-4 truncate">
+            <div className="flex items-center gap-3 sm:gap-4 truncate">
               <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-background shrink-0 shadow-md"
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-xs font-bold text-background shrink-0 shadow-md"
                 style={{ background: "var(--grad-orange)" }}
               >
                 {m.timeA ? m.timeA.substring(0, 2).toUpperCase() : "—"}
               </div>
               <div className="truncate space-y-0.5">
-                <span className={`text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && m.vencedor === m.timeA ? "text-success" : "text-fg"}`}>
+                <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && m.vencedor === m.timeA ? "text-success" : "text-fg"}`}>
                   {m.timeA || "A definir"}
                 </span>
                 {m.mainA && m.mainA !== "-" ? (
-                  <p className="text-xs text-ow-orange font-semibold">Main: {m.mainA}</p>
+                  <p className="text-[11px] sm:text-xs text-ow-orange font-semibold">Main: {m.mainA}</p>
                 ) : m.plataformaA ? (
-                  <span className="text-[10px] text-fg-dim uppercase tracking-wider block">{m.plataformaA}</span>
+                  <span className="text-[9px] sm:text-[10px] text-fg-dim uppercase tracking-wider block">{m.plataformaA}</span>
                 ) : null}
               </div>
             </div>
-            <span className="font-mono font-bold text-2xl px-4 text-fg tabular-nums">{m.scoreA}</span>
+            <span className="font-mono font-bold text-xl sm:text-2xl px-2 sm:px-4 text-fg tabular-nums">{m.scoreA}</span>
           </div>
 
-          <div className="h-px bg-line mx-5" />
+          <div className="h-px bg-line mx-4 sm:mx-5" />
 
           {/* Jogador B */}
           {isBye ? (
-            <div className="flex items-center gap-4 px-5 py-4 opacity-30">
-              <div className="w-9 h-9 rounded-xl bg-surface-2 border border-line shrink-0" />
-              <span className="text-sm text-fg-dim italic">BYE — passa automaticamente</span>
+            <div className="flex items-center gap-4 px-4 sm:px-5 py-3 sm:py-4 opacity-30">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-surface-2 border border-line shrink-0" />
+              <span className="text-xs sm:text-sm text-fg-dim italic">BYE — passa automaticamente</span>
             </div>
           ) : (
             <div
               data-player={m.timeB}
               data-bt={m.battletagB}
               data-plat={m.plataformaB}
-              className={`flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
+              className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
                 ${concluida && m.vencedor === m.timeB ? "bg-success/15" : ""}
                 ${concluida && m.vencedor !== m.timeB && m.vencedor !== "" && m.vencedor !== "—" ? "opacity-40" : ""}
               `}
             >
-              <div className="flex items-center gap-4 truncate">
+              <div className="flex items-center gap-3 sm:gap-4 truncate">
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-background shrink-0 shadow-md"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-xs font-bold text-background shrink-0 shadow-md"
                   style={{ background: "var(--grad-blue)" }}
                 >
                   {m.timeB ? m.timeB.substring(0, 2).toUpperCase() : "—"}
                 </div>
                 <div className="truncate space-y-0.5">
-                  <span className={`text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && m.vencedor === m.timeB ? "text-success" : "text-fg"}`}>
+                  <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && m.vencedor === m.timeB ? "text-success" : "text-fg"}`}>
                     {m.timeB || "A definir"}
                   </span>
                   {m.mainB && m.mainB !== "-" ? (
-                    <p className="text-xs text-ow-orange font-semibold">Main: {m.mainB}</p>
+                    <p className="text-[11px] sm:text-xs text-ow-orange font-semibold">Main: {m.mainB}</p>
                   ) : m.plataformaB ? (
-                    <span className="text-[10px] text-fg-dim uppercase tracking-wider block">{m.plataformaB}</span>
+                    <span className="text-[9px] sm:text-[10px] text-fg-dim uppercase tracking-wider block">{m.plataformaB}</span>
                   ) : null}
                 </div>
               </div>
-              <span className="font-mono font-bold text-2xl px-4 text-fg tabular-nums">{m.scoreB}</span>
+              <span className="font-mono font-bold text-xl sm:text-2xl px-2 sm:px-4 text-fg tabular-nums">{m.scoreB}</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Footer Status */}
-      <div className="flex items-center justify-between px-5 py-3 bg-surface-2 border-t border-line">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-5 py-2.5 sm:py-3 bg-surface-2 border-t border-line gap-2">
         <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
           concluida ? "bg-success/15 text-success border-success/30" :
           isWO ? "bg-danger/20 text-danger border-danger/40 animate-pulse" : "bg-surface-2 text-fg-muted border-line"
@@ -349,7 +350,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
           {concluida ? "Encerrado" : isWO ? "⚠️ W.O. Aplicado (Atrasado +1h)" : "Aguardando"}
         </span>
         {concluida && m.vencedor && m.vencedor !== "—" && (
-          <span className="text-xs text-fg-dim">
+          <span className="text-xs text-fg-dim truncate">
             Vencedor: <span className="text-success font-bold uppercase tracking-wide">{m.vencedor}</span>
           </span>
         )}
@@ -630,7 +631,8 @@ export default function PublicoPage() {
     return true;
   });
 
-  const isRodadaListagem = subAbaRodada !== "rodada1" && !rodadaAtualAtiva.data.some(m => m.horario && m.horario.trim() !== "");
+  const temHorarioRodada = rodadaAtualAtiva.data.some(m => m.horario && m.horario.trim() !== "");
+  const isRodadaListagem = subAbaRodada !== "rodada1" && !temHorarioRodada;
 
   return (
     <main className="min-h-screen text-fg">
@@ -1011,7 +1013,7 @@ export default function PublicoPage() {
               </div>
               <div className="bg-surface-2 p-3 rounded-xl border border-line">
                 <span className="text-display text-xl font-bold text-danger block">{jogadorPerfil.derrotas}</span>
-                <span className="text-[10px] uppercase tracking-wider text-fg-dim">Derrotas</span>
+                <span className="text-[10px] uppercase tracking-linejoin uppercase tracking-wider text-fg-dim">Derrotas</span>
               </div>
               <div className="bg-surface-2 p-3 rounded-xl border border-line">
                 <span className="text-display text-xl font-bold text-ow-orange block">{jogadorPerfil.totalJogos}</span>
