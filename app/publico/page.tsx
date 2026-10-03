@@ -170,6 +170,19 @@ function parseHorarioToMinutes(horarioStr: string): number {
   return dayVal;
 }
 
+function extractHorario(cols: string[]): string {
+  for (let c = 0; c < cols.length; c++) {
+    const val = cols[c] || "";
+    const lower = val.toLowerCase();
+    if (val.includes(":") || lower.includes("sábado") || lower.includes("sabado") || lower.includes("sexta") || lower.includes("domingo") || lower.endsWith("h")) {
+      if (!val.includes("#") && val.length < 35 && !val.toLowerCase().includes("pendente") && !val.toLowerCase().includes("concluida")) {
+        return val;
+      }
+    }
+  }
+  return "";
+}
+
 function checkIsWO(horarioStr?: string, status?: string, vencedor?: string): boolean {
   if (!horarioStr || status === "concluida" || vencedor) return false;
   const lower = horarioStr.toLowerCase();
@@ -449,17 +462,10 @@ export default function PublicoPage() {
           if (pB && pB !== "BYE") parsedPartes.push({ nome: pB, battletag: btB, plataforma: platB });
         }
 
-        // Helper para parsear rodadas 2 em diante (que podem ter horário também)
         const parseSubRodada = (cols: string[], faseName: string) => {
-          if (cols.length < 10 || !cols[0]?.startsWith("Jogo") && !cols[0]?.startsWith("Oitavas") && !cols[0]?.startsWith("Quartas") && !cols[0]?.startsWith("Semifinal") && !cols[0]?.includes("Final")) return null;
+          if (cols.length < 10 || (!cols[0]?.startsWith("Jogo") && !cols[0]?.startsWith("Oitavas") && !cols[0]?.startsWith("Quartas") && !cols[0]?.startsWith("Semifinal") && !cols[0]?.includes("Final"))) return null;
 
-          let hor = "";
-          for (let c = 10; c < cols.length; c++) {
-            if (cols[c] && cols[c].length > 0) {
-              hor = cols[c];
-              break;
-            }
-          }
+          const hor = extractHorario(cols);
 
           return {
             id: cols[0] || "",
@@ -516,14 +522,13 @@ export default function PublicoPage() {
       }
     }
 
-    // Ordenar Rodada 1 por horário cronológico (Sábado primeiro, depois Sexta)
+    // Ordenar todas as rodadas por horário cronológico se houver horário
     parsedRodada1.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
     parsedRodada1 = parsedRodada1.map((m, idx) => ({
       ...m,
       id: `#${(idx + 1).toString().padStart(2, '0')}`
     }));
 
-    // Se Rodada 2 tiver horários, ordenar também; senão, manter ordem
     parsedRodada2.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
     parsedOitavas.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
     parsedQuartas.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
