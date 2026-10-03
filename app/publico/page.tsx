@@ -157,8 +157,9 @@ function parseHorarioToMinutes(horarioStr: string): number {
   if (!horarioStr) return 999999;
   const lower = horarioStr.toLowerCase();
   let dayVal = 0;
-  if (lower.includes("sexta")) dayVal = 1000;
-  else if (lower.includes("sábado") || lower.includes("sabado")) dayVal = 2000;
+  // Sábado vem primeiro (menor valor), Sexta vem depois (maior valor)
+  if (lower.includes("sábado") || lower.includes("sabado")) dayVal = 1000;
+  else if (lower.includes("sexta")) dayVal = 2000;
   else if (lower.includes("domingo")) dayVal = 3000;
 
   const match = lower.match(/(\d{1,2}):(\d{2})/);
@@ -547,6 +548,7 @@ export default function PublicoPage() {
       }
     }
 
+    // ORDENAR CORRETAMENTE POR HORÁRIO: Sábado (mais cedo para mais tarde) depois Sexta, garantindo #01 até #16 para Sábado e #17 até #32 para Sexta
     parsedRodada1.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
     parsedRodada1 = parsedRodada1.map((m, idx) => ({
       ...m,
@@ -639,7 +641,6 @@ export default function PublicoPage() {
     return true;
   });
 
-  // A partir da 2ª rodada, exibir em formato de listagem (1 coluna) em vez de grade de 2 colunas
   const isRodadaListagem = subAbaRodada !== "rodada1";
 
   return (
