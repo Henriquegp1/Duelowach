@@ -201,7 +201,8 @@ function checkIsWO(horarioStr?: string, status?: string, vencedor?: string, scor
   const hours = parseInt(match[1], 10);
   const mins = parseInt(match[2], 10);
 
-  const matchDate = new Date(2026, 9, 3, hours, mins, 0).getTime();
+  const matchDay = lower.includes("domingo") ? 4 : lower.includes("sexta") ? 2 : 3;
+  const matchDate = new Date(2026, 9, matchDay, hours, mins, 0).getTime();
   const now = Date.now();
   return now > matchDate + 60 * 60 * 1000;
 }
