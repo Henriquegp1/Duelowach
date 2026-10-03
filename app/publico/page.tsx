@@ -183,13 +183,17 @@ function extractHorario(cols: string[]): string {
   return "";
 }
 
-function checkIsWO(horarioStr?: string, status?: string, vencedor?: string): boolean {
+function checkIsWO(horarioStr?: string, status?: string, vencedor?: string, scoreA?: string, scoreB?: string): boolean {
+  // Se já tem vencedor ou pontuação preenchida, NUNCA é W.O.
+  if (status === "concluida" || (vencedor && vencedor.trim() !== "" && vencedor !== "—")) return false;
+  if (scoreA && scoreA !== "—" && scoreA !== "" && scoreB && scoreB !== "—" && scoreB !== "") return false;
+
   const v = (vencedor || "").toLowerCase();
   const s = (status || "").toLowerCase();
   if (v.includes("w.o") || v.includes("wo") || s.includes("w.o") || s.includes("wo")) {
     return true;
   }
-  if (!horarioStr || status === "concluida" || vencedor) return false;
+  if (!horarioStr) return false;
 
   const lower = horarioStr.toLowerCase();
   const match = lower.match(/(\d{1,2}):(\d{2})/);
@@ -198,13 +202,9 @@ function checkIsWO(horarioStr?: string, status?: string, vencedor?: string): boo
   const hours = parseInt(match[1], 10);
   const mins = parseInt(match[2], 10);
 
-  // Se estiver escrito "Sexta", consideramos a data de sexta-feira 3 de outubro de 2026 às 19:40h
-  // Mas como a hora atual é 00:19 de sexta-feira 3 de outubro, 19:40 ainda vai acontecer hoje.
-  // Para permitir testar W.O. ou verificar se o horário já passou, se o horário agendado for menor que a hora atual no mesmo dia:
-  const now = new Date();
   const matchDate = new Date(2026, 9, 3, hours, mins, 0).getTime();
-
-  return now.getTime() > matchDate + 60 * 60 * 1000;
+  const now = Date.now();
+  return now > matchDate + 60 * 60 * 1000;
 }
 
 function CountdownTimer() {
@@ -247,8 +247,8 @@ function CountdownTimer() {
 }
 
 function CardConfronto({ m }: { m: MatchItem }) {
-  const concluida = m.status === "concluida" || m.vencedor !== "";
-  const isWO = checkIsWO(m.horario, m.status, m.vencedor);
+  const concluida = m.status === "concluida" || (m.vencedor !== "" && m.vencedor !== "—");
+  const isWO = checkIsWO(m.horario, m.status, m.vencedor, m.scoreA, m.scoreB);
   const isBye = m.timeB === "BYE";
 
   return (
@@ -274,7 +274,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
             data-plat={m.plataformaA}
             className={`flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
               ${concluida && m.vencedor === m.timeA ? "bg-success/15" : ""}
-              ${concluida && m.vencedor !== m.timeA && m.vencedor !== "" && !isBye ? "opacity-40" : ""}
+              ${concluida && m.vencedor !== m.timeA && m.vencedor !== "" && m.vencedor !== "—" && !isBye ? "opacity-40" : ""}
             `}
           >
             <div className="flex items-center gap-4 truncate">
@@ -313,7 +313,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
               data-plat={m.plataformaB}
               className={`flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
                 ${concluida && m.vencedor === m.timeB ? "bg-success/15" : ""}
-                ${concluida && m.vencedor !== m.timeB && m.vencedor !== "" ? "opacity-40" : ""}
+                ${concluida && m.vencedor !== m.timeB && m.vencedor !== "" && m.vencedor !== "—" ? "opacity-40" : ""}
               `}
             >
               <div className="flex items-center gap-4 truncate">
@@ -343,12 +343,12 @@ function CardConfronto({ m }: { m: MatchItem }) {
       {/* Footer Status */}
       <div className="flex items-center justify-between px-5 py-3 bg-surface-2 border-t border-line">
         <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
-          isWO ? "bg-danger/20 text-danger border-danger/40 animate-pulse" :
-          concluida ? "bg-success/15 text-success border-success/30" : "bg-surface-2 text-fg-muted border-line"
+          concluida ? "bg-success/15 text-success border-success/30" :
+          isWO ? "bg-danger/20 text-danger border-danger/40 animate-pulse" : "bg-surface-2 text-fg-muted border-line"
         }`}>
-          {isWO ? "⚠️ W.O. Aplicado (Atrasado +1h)" : concluida ? "Encerrado" : "Aguardando"}
+          {concluida ? "Encerrado" : isWO ? "⚠️ W.O. Aplicado (Atrasado +1h)" : "Aguardando"}
         </span>
-        {concluida && m.vencedor && (
+        {concluida && m.vencedor && m.vencedor !== "—" && (
           <span className="text-xs text-fg-dim">
             Vencedor: <span className="text-success font-bold uppercase tracking-wide">{m.vencedor}</span>
           </span>
@@ -464,7 +464,7 @@ export default function PublicoPage() {
             plataformaB: platB,
             scoreB: scB,
             vencedor: venc,
-            status: venc ? "concluida" : "pendente",
+            status: venc && venc !== "—" ? "concluida" : "pendente",
             horario: hor
           });
 
@@ -476,6 +476,7 @@ export default function PublicoPage() {
           if (cols.length < 10 || (!cols[0]?.startsWith("Jogo") && !cols[0]?.startsWith("Oitavas") && !cols[0]?.startsWith("Quartas") && !cols[0]?.startsWith("Semifinal") && !cols[0]?.includes("Final"))) return null;
 
           const hor = extractHorario(cols);
+          const venc = cols[9] || "";
 
           return {
             id: cols[0] || "",
@@ -488,8 +489,8 @@ export default function PublicoPage() {
             timeB: cols[6] || "",
             mainB: cols[7] || "",
             plataformaB: cols[8] || "",
-            vencedor: cols[9] || "",
-            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente",
+            vencedor: venc,
+            status: (cols[10]?.toLowerCase() === "concluida" || (venc && venc !== "—")) ? "concluida" : "pendente",
             horario: hor
           };
         };
@@ -623,7 +624,7 @@ export default function PublicoPage() {
   const rodadaAtualAtiva = rodadasTabs.find(r => r.id === subAbaRodada) || rodadasTabs[0];
 
   const partidasFiltradas = rodadaAtualAtiva.data.filter(m => {
-    const concluida = m.status === "concluida" || m.vencedor !== "";
+    const concluida = m.status === "concluida" || (m.vencedor !== "" && m.vencedor !== "—");
     if (filtroStatus === "encerrado") return concluida;
     if (filtroStatus === "aguardando") return !concluida;
     return true;
@@ -911,7 +912,7 @@ export default function PublicoPage() {
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎮 Partidas em MD3 & Main vs Main</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Todas as partidas são disputadas em **Melhor de 3 (MD3)**. 참가자 각자 본인의 main으로 플레이합니다 (ou seja, Main vs Main).
+                      Todas as partidas são disputadas em **Melhor de 3 (MD3)**. Cada participante joga com seu próprio main (ex: Genji vs Genji, Cassidy vs Cassidy).
                     </p>
                   </div>
 
@@ -971,7 +972,7 @@ export default function PublicoPage() {
         </div>
       )}
 
-      {/* Modal de Perfil/W.O. ou Jogador */}
+      {/* Modal de Perfil do Jogador */}
       {jogadorPerfil && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
