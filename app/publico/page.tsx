@@ -673,9 +673,13 @@ export default function PublicoPage() {
           role="alert"
           className="border-2 border-danger/70 bg-danger/15 px-5 py-4 text-center text-danger shadow-[0_0_24px_rgba(239,68,68,0.18)]"
         >
-          <p className="text-sm font-bold uppercase tracking-wider">Aviso importante</p>
+          <p className="text-sm font-bold uppercase tracking-wider">Confirmação de presença obrigatória</p>
           <p className="mt-1 text-sm font-semibold">
-            O torneio terá um atraso de 30 minutos devido a problemas no servidor da Overwatch.
+            Mesmo que não consiga abrir o jogo, compareça à call “ME PUXE” no horário da sua partida.
+            A ausência na call resultará em W.O. imediato.
+          </p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-wider">
+            Leia no Discord o aviso completo sobre o reagendamento para domingo.
           </p>
         </div>
       </div>
