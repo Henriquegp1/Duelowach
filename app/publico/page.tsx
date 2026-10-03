@@ -668,6 +668,18 @@ export default function PublicoPage() {
         </div>
       </header>
 
+      <div className="max-w-6xl mx-auto px-6 md:px-8 pt-6">
+        <div
+          role="alert"
+          className="border-2 border-danger/70 bg-danger/15 px-5 py-4 text-center text-danger shadow-[0_0_24px_rgba(239,68,68,0.18)]"
+        >
+          <p className="text-sm font-bold uppercase tracking-wider">Aviso importante</p>
+          <p className="mt-1 text-sm font-semibold">
+            O torneio terá um atraso de 30 minutos devido a problemas no servidor da Overwatch.
+          </p>
+        </div>
+      </div>
+
       {/* Abas */}
       <nav className="border-b border-line bg-surface/95 backdrop-blur-md sticky top-0 z-50 shadow-md">
         <div className="max-w-6xl mx-auto px-6 md:px-8 flex justify-center gap-2">
