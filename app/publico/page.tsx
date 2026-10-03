@@ -174,8 +174,8 @@ function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
 
   useEffect(() => {
-    // Alvo ajustado para a próxima sexta-feira às 19:30h (data futura)
-    const targetDate = new Date("2026-10-09T19:30:00").getTime();
+    // Alvo ajustado para este sábado, 4 de outubro de 2026 às 19:30h
+    const targetDate = new Date("2026-10-04T19:30:00").getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -738,7 +738,7 @@ export default function PublicoPage() {
                 {/* CARD 2: Standalone Countdown Timer (Somente a Contagem) */}
                 <section className="surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 max-w-3xl mx-auto">
                   <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
-                    <span>🕒</span> Início da Próxima Edição do Torneio
+                    <span>🕒</span> Início do Torneio (Sábado, 4 de Outubro às 19:30h)
                   </h3>
                   <CountdownTimer />
                 </section>
@@ -984,7 +984,7 @@ export default function PublicoPage() {
               </button>
             </div>
 
-            <div className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-2xl font-bold text-background shadow-lg" style={{ background: "var(--grad-blue)" }}>
+        <div className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-2xl font-bold text-background shadow-lg" style={{ background: "var(--grad-blue)" }}>
               {jogadorPerfil.nome.substring(0, 2).toUpperCase()}
             </div>
 
