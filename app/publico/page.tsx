@@ -30,9 +30,9 @@ RheaTracy,RheaTracy #1864,PC,,,XSaTurn0,XSaTurn0#1164,XBOX Series S/X,,"Sábado,
 Viøłet,Viøłet#2832,PlayStation 4,,,CAFEINADO,Cafeinado#21268,PlayStation 4,,"Sábado, 21:50h",
 yoshiki,luesancar#1517,Xbox,,,WindExile - André,Wind#1464,PC,,"Sábado, 22:00h",
 Salomao2026,Salomao2021 #1712,PC,0,0,BlackWolf,BlackWolf#14881,XBOX One (Normal ou S),Empate,"Sexta-feira, 19:30h",
-GYta,GYTA#21353,PlayStadion 5,,,dani02908,DANI02908#1120,PC,,"Sexta-feira, 19:40h",
-chicobento,chicobento #21209,PC,,,Wilkher02,Wilkher02#2666 ,PlayStadion 5,,"Sexta-feira, 19:50h",
-JUNDERZ,JUNDER#1325,PC,,,Alewoja,Alewoja#1608,XBOX Series S/X,,"Sexta-feira, 20:00h",
+GYta,GYTA#21353,PlayStadion 5,,,dani02908,DANI02908#1120,PC,,"Sábado, 19:40h",
+chicobento,chicobento #21209,PC,,,Wilkher02,Wilkher02#2666 ,PlayStadion 5,,"Sábado, 19:50h",
+JUNDERZ,JUNDER#1325,PC,,,Alewoja,Alewoja#1608,XBOX Series S/X,,"Sábado, 20:00h",
 Salomao2021,Salomao2021 #1712,PC,,,Maria eduarda,Twilight#13390,XBOX One (Normal ou S),,"Sexta-feira, 20:10h",
 C4BRAL,C4bral #1499,PC,,,GAB3,GaB3 #21760,PC,,"Sexta-feira, 20:20h",
 Sivil,Sivil#11412,PC,,,Fussy,Fussy#21790,PC,,"Sexta-feira, 20:30h",
@@ -174,7 +174,8 @@ function CountdownTimer() {
   const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
 
   useEffect(() => {
-    const targetDate = new Date("2026-10-02T19:30:00").getTime();
+    // Alvo ajustado para a próxima sexta-feira às 19:30h (data futura)
+    const targetDate = new Date("2026-10-09T19:30:00").getTime();
 
     const interval = setInterval(() => {
       const now = new Date().getTime();
@@ -193,16 +194,16 @@ function CountdownTimer() {
   }, []);
 
   return (
-    <div className="flex justify-center gap-2 md:gap-3">
+    <div className="flex justify-center gap-3 md:gap-4 my-2">
       {[
         { label: "Dias", val: timeLeft.dias },
         { label: "Horas", val: timeLeft.horas },
         { label: "Minutos", val: timeLeft.minutos },
         { label: "Segundos", val: timeLeft.segundos },
       ].map((item, idx) => (
-        <div key={idx} className="surface-card px-3 py-2 rounded-xl border border-ow-orange/30 bg-surface-2 text-center min-w-[60px] shadow-md">
-          <span className="text-display text-xl md:text-2xl font-bold text-ow-orange tabular-nums block">{String(item.val).padStart(2, "0")}</span>
-          <span className="text-[9px] text-fg-dim uppercase tracking-widest">{item.label}</span>
+        <div key={idx} className="surface-card px-4 py-3 rounded-xl border border-ow-orange/45 bg-surface-2 text-center min-w-[75px] shadow-md">
+          <span className="text-display text-2xl md:text-3xl font-bold text-ow-orange tabular-nums block">{String(item.val).padStart(2, "0")}</span>
+          <span className="text-[10px] text-fg-dim uppercase tracking-widest">{item.label}</span>
         </div>
       ))}
     </div>
@@ -684,8 +685,8 @@ export default function PublicoPage() {
           <>
             {/* INÍCIO & PREMIAÇÃO */}
             {aba === "inicio" && (
-              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {/* Hero Card / Banner com Premiação Inclusa */}
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* CARD 1: Hero Banner com Boas-Vindas e Premiação */}
                 <section className="relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
                   <div className="absolute inset-0 hero-grad opacity-40 pointer-events-none" />
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-ow-orange/10 blur-[80px] pointer-events-none" />
@@ -702,12 +703,6 @@ export default function PublicoPage() {
                     <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
                       Duelos intensos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3) com os mains de cada jogador e desempate com herói secreto e aleatório.
                     </p>
-
-                    {/* Contador Regressivo Logo Abaixo do Texto */}
-                    <div className="py-2">
-                      <p className="text-xs uppercase tracking-[0.2em] text-ow-orange font-bold mb-3">🕒 Início do Torneio em:</p>
-                      <CountdownTimer />
-                    </div>
 
                     {/* Premiação Destaque (Clicável) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
@@ -738,6 +733,14 @@ export default function PublicoPage() {
                       </div>
                     </div>
                   </div>
+                </section>
+
+                {/* CARD 2: Standalone Countdown Timer (Somente a Contagem) */}
+                <section className="surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 max-w-3xl mx-auto">
+                  <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
+                    <span>🕒</span> Início da Próxima Edição do Torneio
+                  </h3>
+                  <CountdownTimer />
                 </section>
 
                 {/* Transmissão do Akira */}
