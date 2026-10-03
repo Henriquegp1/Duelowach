@@ -157,7 +157,6 @@ function parseHorarioToMinutes(horarioStr: string): number {
   if (!horarioStr) return 999999;
   const lower = horarioStr.toLowerCase();
   let dayVal = 0;
-  // Sábado vem primeiro (menor valor), Sexta vem depois (maior valor)
   if (lower.includes("sábado") || lower.includes("sabado")) dayVal = 1000;
   else if (lower.includes("sexta")) dayVal = 2000;
   else if (lower.includes("domingo")) dayVal = 3000;
@@ -450,10 +449,21 @@ export default function PublicoPage() {
           if (pB && pB !== "BYE") parsedPartes.push({ nome: pB, battletag: btB, plataforma: platB });
         }
 
-        if (currentSection === "rodada2" && cols.length >= 10 && cols[0]?.startsWith("Jogo")) {
-          parsedRodada2.push({
+        // Helper para parsear rodadas 2 em diante (que podem ter horário também)
+        const parseSubRodada = (cols: string[], faseName: string) => {
+          if (cols.length < 10 || !cols[0]?.startsWith("Jogo") && !cols[0]?.startsWith("Oitavas") && !cols[0]?.startsWith("Quartas") && !cols[0]?.startsWith("Semifinal") && !cols[0]?.includes("Final")) return null;
+
+          let hor = "";
+          for (let c = 10; c < cols.length; c++) {
+            if (cols[c] && cols[c].length > 0) {
+              hor = cols[c];
+              break;
+            }
+          }
+
+          return {
             id: cols[0] || "",
-            fase: "2ª Rodada",
+            fase: faseName,
             timeA: cols[1] || "",
             mainA: cols[2] || "",
             plataformaA: cols[3] || "",
@@ -463,76 +473,34 @@ export default function PublicoPage() {
             mainB: cols[7] || "",
             plataformaB: cols[8] || "",
             vencedor: cols[9] || "",
-            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
-          });
+            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente",
+            horario: hor
+          };
+        };
+
+        if (currentSection === "rodada2") {
+          const item = parseSubRodada(cols, "2ª Rodada");
+          if (item) parsedRodada2.push(item);
         }
 
-        if (currentSection === "oitavas" && cols.length >= 10 && (cols[0]?.startsWith("Oitavas") || cols[0]?.startsWith("Jogo"))) {
-          parsedOitavas.push({
-            id: cols[0] || "",
-            fase: "Oitavas de Final",
-            timeA: cols[1] || "",
-            mainA: cols[2] || "",
-            plataformaA: cols[3] || "",
-            scoreA: cols[4] || "—",
-            scoreB: cols[5] || "—",
-            timeB: cols[6] || "",
-            mainB: cols[7] || "",
-            plataformaB: cols[8] || "",
-            vencedor: cols[9] || "",
-            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
-          });
+        if (currentSection === "oitavas") {
+          const item = parseSubRodada(cols, "Oitavas de Final");
+          if (item) parsedOitavas.push(item);
         }
 
-        if (currentSection === "quartas" && cols.length >= 10 && cols[0]?.startsWith("Quartas")) {
-          parsedQuartas.push({
-            id: cols[0] || "",
-            fase: "Quartas de Final",
-            timeA: cols[1] || "",
-            mainA: cols[2] || "",
-            plataformaA: cols[3] || "",
-            scoreA: cols[4] || "—",
-            scoreB: cols[5] || "—",
-            timeB: cols[6] || "",
-            mainB: cols[7] || "",
-            plataformaB: cols[8] || "",
-            vencedor: cols[9] || "",
-            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
-          });
+        if (currentSection === "quartas") {
+          const item = parseSubRodada(cols, "Quartas de Final");
+          if (item) parsedQuartas.push(item);
         }
 
-        if (currentSection === "semifinais" && cols.length >= 10 && cols[0]?.startsWith("Semifinal")) {
-          parsedSemifinais.push({
-            id: cols[0] || "",
-            fase: "Semifinais",
-            timeA: cols[1] || "",
-            mainA: cols[2] || "",
-            plataformaA: cols[3] || "",
-            scoreA: cols[4] || "—",
-            scoreB: cols[5] || "—",
-            timeB: cols[6] || "",
-            mainB: cols[7] || "",
-            plataformaB: cols[8] || "",
-            vencedor: cols[9] || "",
-            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
-          });
+        if (currentSection === "semifinais") {
+          const item = parseSubRodada(cols, "Semifinais");
+          if (item) parsedSemifinais.push(item);
         }
 
-        if (currentSection === "final" && cols.length >= 10 && (cols[0]?.startsWith("Grande") || cols[0]?.includes("Final"))) {
-          parsedFinal.push({
-            id: cols[0] || "",
-            fase: "Grande Final",
-            timeA: cols[1] || "",
-            mainA: cols[2] || "",
-            plataformaA: cols[3] || "",
-            scoreA: cols[4] || "—",
-            scoreB: cols[5] || "—",
-            timeB: cols[6] || "",
-            mainB: cols[7] || "",
-            plataformaB: cols[8] || "",
-            vencedor: cols[9] || "",
-            status: cols[10]?.toLowerCase() === "concluida" ? "concluida" : "pendente"
-          });
+        if (currentSection === "final") {
+          const item = parseSubRodada(cols, "Grande Final");
+          if (item) parsedFinal.push(item);
         }
 
         if (currentSection === "podio" && cols.length >= 3 && cols[0]?.includes("Lugar")) {
@@ -548,12 +516,18 @@ export default function PublicoPage() {
       }
     }
 
-    // ORDENAR CORRETAMENTE POR HORÁRIO: Sábado (mais cedo para mais tarde) depois Sexta, garantindo #01 até #16 para Sábado e #17 até #32 para Sexta
+    // Ordenar Rodada 1 por horário cronológico (Sábado primeiro, depois Sexta)
     parsedRodada1.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
     parsedRodada1 = parsedRodada1.map((m, idx) => ({
       ...m,
       id: `#${(idx + 1).toString().padStart(2, '0')}`
     }));
+
+    // Se Rodada 2 tiver horários, ordenar também; senão, manter ordem
+    parsedRodada2.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
+    parsedOitavas.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
+    parsedQuartas.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
+    parsedSemifinais.sort((a, b) => parseHorarioToMinutes(a.horario || "") - parseHorarioToMinutes(b.horario || ""));
 
     setRodada1(parsedRodada1);
     setRodada2(parsedRodada2);
@@ -641,7 +615,9 @@ export default function PublicoPage() {
     return true;
   });
 
-  const isRodadaListagem = subAbaRodada !== "rodada1";
+  // Se a rodada tiver horários definidos, exibe em grade de 2 colunas; se não tiver, exibe em listagem (1 coluna)
+  const temHorarioRodada = rodadaAtualAtiva.data.some(m => m.horario && m.horario.trim() !== "");
+  const isRodadaListagem = subAbaRodada !== "rodada1" && !temHorarioRodada;
 
   return (
     <main className="min-h-screen text-fg">
