@@ -114,6 +114,22 @@ body {
   animation: ow-pulse 1.4s ease-in-out infinite;
 }
 
+@keyframes ow-confetti-fall {
+  0% { opacity: 0; top: -5vh; transform: translate3d(0, 0, 0) rotate(0deg); }
+  10% { opacity: 1; }
+  100% { opacity: 0.9; top: 108vh; transform: translate3d(24px, 0, 0) rotate(720deg); }
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -5vh;
+  width: 9px;
+  height: 16px;
+  animation-name: ow-confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
 /* Skeleton */
 @keyframes ow-shimmer {
   0% { background-position: -400px 0; }

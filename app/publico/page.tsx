@@ -134,6 +134,44 @@ interface PodioItem {
 
 type Aba = "inicio" | "partidas" | "podio" | "regras";
 
+const CELEBRATION_STORAGE_KEY = "duelowatch-final-celebration-until";
+const CELEBRATION_PENDING_KEY = "duelowatch-final-celebration-pending";
+const CELEBRATION_DURATION_MS = 20 * 1000;
+const CONFETTI_PARTICLES = Array.from({ length: 72 }, (_, index) => ({
+  id: index,
+  left: (index * 37) % 101,
+  delay: (index % 18) * 0.11,
+  duration: 3.2 + (index % 7) * 0.28,
+  rotation: (index * 47) % 360,
+  color: ["#F99E1A", "#218FFE", "#22C55E", "#E6EDF7", "#EF4444"][index % 5],
+  shape: index % 3 === 0 ? "rounded-sm" : "rounded-[1px]"
+}));
+
+function ConfettiCelebration({ winner }: { winner: string }) {
+  return (
+    <div className="fixed inset-0 z-[60] pointer-events-none overflow-hidden" aria-live="assertive" role="status">
+      <div className="absolute inset-x-0 top-8 text-center px-4">
+        <p className="inline-block rounded-xl border border-ow-orange/60 bg-background/90 px-5 py-3 text-display text-lg font-bold uppercase tracking-wider text-ow-orange shadow-[0_0_30px_rgba(249,158,26,0.35)]">
+          🏆 Grande campeão: {winner}
+        </p>
+      </div>
+      {CONFETTI_PARTICLES.map(particle => (
+        <span
+          key={particle.id}
+          className={`confetti-piece ${particle.shape}`}
+          style={{
+            left: `${particle.left}%`,
+            backgroundColor: particle.color,
+            animationDelay: `${particle.delay}s`,
+            animationDuration: `${particle.duration}s`,
+            transform: `rotate(${particle.rotation}deg)`
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function parseCSVLine(text: string): string[] {
   const result: string[] = [];
   let current = "";
@@ -380,6 +418,7 @@ export default function PublicoPage() {
   const [grandeFinal, setGrandeFinal] = useState<MatchItem[]>([]);
   const [podio, setPodio] = useState<PodioItem[]>([]);
   const [participantes, setParticipantes] = useState<Participant[]>([]);
+  const [celebracaoAte, setCelebracaoAte] = useState<number | null>(null);
 
   const parseCSV = (csvText: string) => {
     if (!csvText) return;
@@ -644,6 +683,48 @@ export default function PublicoPage() {
   const faseAtual = rodadasTabs.find(rodada => rodada.id === faseAtualId) || rodadasTabs[0];
   const proximaPartida = encontrarProximaPartida(rodadasTabs, faseAtualId, agora);
 
+  const vencedorFinal = grandeFinal.length > 0 && grandeFinal.every(partidaConcluida)
+    ? determinarVencedor(grandeFinal[0])
+    : "";
+
+  useEffect(() => {
+    const atualizarCelebracao = () => {
+      const pendente = window.localStorage.getItem(CELEBRATION_PENDING_KEY) === "true";
+      if (document.hidden && pendente) return;
+
+      const agoraMs = Date.now();
+      const ate = Number(window.localStorage.getItem(CELEBRATION_STORAGE_KEY) || 0);
+      if (!document.hidden && pendente) {
+        const novoAte = agoraMs + CELEBRATION_DURATION_MS;
+        window.localStorage.setItem(CELEBRATION_STORAGE_KEY, String(novoAte));
+        window.localStorage.removeItem(CELEBRATION_PENDING_KEY);
+        setCelebracaoAte(novoAte);
+        return;
+      }
+
+      setCelebracaoAte(ate > agoraMs ? ate : null);
+    };
+
+    if (vencedorFinal) {
+      const salvoAte = Number(window.localStorage.getItem(CELEBRATION_STORAGE_KEY) || 0);
+      if (document.hidden) {
+        window.localStorage.setItem(CELEBRATION_PENDING_KEY, "true");
+      } else if (salvoAte <= Date.now()) {
+        window.localStorage.setItem(CELEBRATION_STORAGE_KEY, String(Date.now() + CELEBRATION_DURATION_MS));
+      }
+    }
+
+    const inicializarCelebracao = window.setTimeout(atualizarCelebracao, 0);
+    const timer = window.setInterval(atualizarCelebracao, 1000);
+    document.addEventListener("visibilitychange", atualizarCelebracao);
+
+    return () => {
+      window.clearTimeout(inicializarCelebracao);
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", atualizarCelebracao);
+    };
+  }, [vencedorFinal]);
+
   useEffect(() => {
     const timer = window.setInterval(() => setAgora(new Date()), 60 * 1000);
     return () => window.clearInterval(timer);
@@ -730,12 +811,14 @@ export default function PublicoPage() {
             {/* INÍCIO & PREMIAÇÃO */}
             {aba === "inicio" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <section className="order-0 lg:col-span-2 surface-card p-5 md:p-6 border border-ow-orange/50 bg-ow-orange/10 shadow-[0_0_24px_rgba(249,158,26,0.12)]">
-                  <h2 className="text-display text-lg font-bold uppercase tracking-wider text-ow-orange">📢 Aviso importante</h2>
-                  <p className="text-fg-muted text-sm leading-relaxed mt-2">
-                    Apenas na <strong className="text-fg">2ª rodada</strong> o jogo pode ser adiantado se os dois jogadores estiverem na call. Com apenas um jogador presente, aguarde o horário marcado. Nas demais etapas, siga a sequência do chaveamento: o jogador ausente terá <strong className="text-fg">10 minutos</strong> para entrar na call antes do possível W.O.
-                  </p>
-                </section>
+                {!vencedorFinal && (
+                  <section className="order-0 lg:col-span-2 surface-card p-5 md:p-6 border border-ow-orange/50 bg-ow-orange/10 shadow-[0_0_24px_rgba(249,158,26,0.12)]">
+                    <h2 className="text-display text-lg font-bold uppercase tracking-wider text-ow-orange">📢 Aviso importante</h2>
+                    <p className="text-fg-muted text-sm leading-relaxed mt-2">
+                      O jogador ausente terá <strong className="text-fg">10 minutos</strong> para entrar na call antes do possível W.O.
+                    </p>
+                  </section>
+                )}
 
                 {/* CARD 1: Hero Banner com Boas-Vindas e Premiação */}
                 <section className="order-3 lg:col-span-2 relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
@@ -1009,6 +1092,10 @@ export default function PublicoPage() {
           </>
         )}
       </div>
+
+      {vencedorFinal && celebracaoAte && (
+        <ConfettiCelebration winner={vencedorFinal} />
+      )}
 
       {/* Modal de Premiação */}
       {modalPremio && (
