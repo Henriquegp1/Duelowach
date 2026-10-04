@@ -757,7 +757,7 @@ export default function PublicoPage() {
                   <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
                     <span>⚔️</span> Torneio em andamento · 2ª Rodada
                   </h3>
-                  <CountdownTimer />
+                  <p className="text-sm text-fg-muted">Acompanhe as partidas da fase atual no chaveamento abaixo.</p>
                 </section>
 
                 {/* Transmissão do Akira */}
