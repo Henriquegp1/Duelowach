@@ -957,10 +957,13 @@ export default function PublicoPage() {
                     </p>
                   </div>
 
-                  <div className="surface-card p-6 space-y-2">
-                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">📞 Canal de Voz & Regra de W.O.</h3>
+                  <div className="surface-card p-6 space-y-3 border-ow-orange/40">
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">📢 Horários, Call & Sequência</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Os participantes devem estar no canal de voz <strong>(ME PUXE)</strong> com pelo menos <strong>5 minutos de antecedência</strong> da partida. Tolerância máxima de <strong>5 minutos</strong>; ausência resulta em <strong>W.O.</strong>
+                      <strong className="text-fg">Somente na 1ª rodada</strong>, a partida pode ser adiantada se os dois jogadores estiverem presentes na call <strong className="text-fg">(ME PUXE)</strong>. Se apenas um jogador estiver na call, o confronto deve aguardar o horário marcado.
+                    </p>
+                    <p className="text-fg-muted text-sm leading-relaxed">
+                      Nas demais etapas, não há horário fixo: os confrontos seguem a sequência do chaveamento. Quando a partida for chamada, o jogador ausente terá <strong className="text-fg">10 minutos</strong> para entrar na call; depois disso, poderá ser aplicado <strong className="text-fg">W.O.</strong>
                     </p>
                   </div>
 
