@@ -730,9 +730,9 @@ export default function PublicoPage() {
           <>
             {/* INÍCIO & PREMIAÇÃO */}
             {aba === "inicio" && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex flex-col space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* CARD 1: Hero Banner com Boas-Vindas e Premiação */}
-                <section className="relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
+                <section className="order-2 relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
                   <div className="absolute inset-0 hero-grad opacity-40 pointer-events-none" />
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-ow-orange/10 blur-[80px] pointer-events-none" />
 
@@ -781,14 +781,14 @@ export default function PublicoPage() {
                 </section>
 
                 {/* CARD 2: Status atual do torneio */}
-                <section className="surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 max-w-3xl mx-auto">
+                <section className="order-1 surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 max-w-3xl mx-auto">
                   <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
                     <span>⚔️</span> Torneio em andamento · {faseAtual.label}
                   </h3>
                   <p className="text-sm text-fg-muted">Acompanhe as partidas da fase atual no chaveamento abaixo.</p>
                 </section>
 
-                <section className="surface-card max-w-3xl mx-auto rounded-3xl p-6 md:p-8 border border-ow-blue/40 shadow-xl bg-surface-2">
+                <section className="order-3 surface-card max-w-3xl mx-auto rounded-3xl p-6 md:p-8 border border-ow-blue/40 shadow-xl bg-surface-2">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-line pb-4">
                     <div>
                       <p className="text-xs uppercase tracking-[0.2em] text-ow-blue font-bold">Próximo jogo</p>
