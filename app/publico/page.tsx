@@ -366,6 +366,7 @@ export default function PublicoPage() {
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "encerrado" | "aguardando">("todos");
   const [carregando, setCarregando] = useState(true);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
+  const [twitchParent, setTwitchParent] = useState<string | null>(null);
   const [modalPremio, setModalPremio] = useState<"lesserafim" | "sojourn" | null>(null);
   const [jogadorPerfil, setJogadorPerfil] = useState<{ nome: string; battletag: string; plataforma: string; vitorias: number; derrotas: number; totalJogos: number } | null>(null);
 
@@ -557,6 +558,9 @@ export default function PublicoPage() {
   };
 
   useEffect(() => {
+    const twitchParentTimer = window.setTimeout(() => {
+      setTwitchParent(window.location.hostname || "localhost");
+    }, 0);
     parseCSV(FALLBACK_CSV);
     setUltimaAtualizacao(new Date());
     setCarregando(false);
@@ -576,6 +580,8 @@ export default function PublicoPage() {
       }
     }
     loadLiveData();
+
+    return () => window.clearTimeout(twitchParentTimer);
   }, []);
 
   const abrirPerfilJogador = (nome: string, battletag?: string, plataforma?: string) => {
@@ -765,10 +771,12 @@ export default function PublicoPage() {
                       <h3 className="text-display text-xl font-bold uppercase tracking-wider text-fg">AkiraLegacy</h3>
                     </div>
                     <div className="aspect-video bg-surface-2 rounded-2xl overflow-hidden border border-line-strong shadow-2xl">
-                      <iframe
-                        src="https://player.twitch.tv/?channel=akiralegacy&parent=localhost&parent=web-production-aeb1b.up.railway.app&parent=overwatch-stadium-web.vercel.app&parent=duelowach.vercel.app"
-                        height="100%" width="100%" allowFullScreen className="border-none"
-                      />
+                      {twitchParent && (
+                        <iframe
+                          src={`https://player.twitch.tv/?channel=akiralegacy&parent=${encodeURIComponent(twitchParent)}`}
+                          height="100%" width="100%" allowFullScreen className="border-none"
+                        />
+                      )}
                     </div>
                   </div>
                 </section>
