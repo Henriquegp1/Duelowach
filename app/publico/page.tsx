@@ -572,7 +572,7 @@ export default function PublicoPage() {
 
     async function loadLiveData() {
       try {
-        const res = await fetch(SHEET_API_URL);
+        const res = await fetch(SHEET_API_URL, { cache: "no-store" });
         if (res.ok) {
           const text = await res.text();
           if (text && text.length > 50) {
@@ -585,8 +585,12 @@ export default function PublicoPage() {
       }
     }
     loadLiveData();
+    const refreshTimer = window.setInterval(loadLiveData, 30 * 1000);
 
-    return () => window.clearTimeout(twitchParentTimer);
+    return () => {
+      window.clearTimeout(twitchParentTimer);
+      window.clearInterval(refreshTimer);
+    };
   }, []);
 
   const abrirPerfilJogador = (nome: string, battletag?: string, plataforma?: string) => {
