@@ -183,7 +183,11 @@ function parseHorarioToTimestamp(horarioStr: string, year: number): number | nul
 }
 
 function partidaConcluida(match: MatchItem): boolean {
-  return match.status.toLowerCase() === "concluida" || Boolean(match.vencedor && match.vencedor !== "—");
+  const temPlacar = [match.scoreA, match.scoreB].every(score => {
+    return score.trim() !== "" && score !== "—" && Number.isFinite(Number(score));
+  });
+
+  return match.status.toLowerCase() === "concluida" || Boolean(match.vencedor && match.vencedor !== "—") || temPlacar;
 }
 
 function determinarFaseAtual(rodadas: { id: string; data: MatchItem[] }[]): string {
@@ -195,7 +199,7 @@ function determinarFaseAtual(rodadas: { id: string; data: MatchItem[] }[]): stri
 }
 
 function encontrarProximaPartida(rodadas: { id: string; data: MatchItem[] }[], faseAtualId: string, agora: Date): MatchItem | null {
-  const pendente = (match: MatchItem) => match.status !== "concluida" && (!match.vencedor || match.vencedor === "—");
+  const pendente = (match: MatchItem) => !partidaConcluida(match);
   const partidasAgendadas = rodadas
     .flatMap(rodada => rodada.data)
     .filter(match => pendente(match))
