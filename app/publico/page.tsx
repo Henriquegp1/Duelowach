@@ -362,7 +362,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
 
 export default function PublicoPage() {
   const [aba, setAba] = useState<Aba>("inicio");
-  const [subAbaRodada, setSubAbaRodada] = useState<string>("rodada1");
+  const [subAbaRodada, setSubAbaRodada] = useState<string>("rodada2");
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "encerrado" | "aguardando">("todos");
   const [carregando, setCarregando] = useState(true);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
@@ -752,10 +752,10 @@ export default function PublicoPage() {
                   </div>
                 </section>
 
-                {/* CARD 2: Standalone Countdown Timer (Somente a Contagem) */}
+                {/* CARD 2: Status atual do torneio */}
                 <section className="surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 max-w-3xl mx-auto">
                   <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
-                    <span>🕒</span> Início do Torneio (Sábado, 3 de Outubro às 19:30h)
+                    <span>⚔️</span> Torneio em andamento · 2ª Rodada
                   </h3>
                   <CountdownTimer />
                 </section>
@@ -789,6 +789,11 @@ export default function PublicoPage() {
                 <div className="text-center max-w-xl mx-auto">
                   <h2 className="text-display text-3xl font-bold uppercase tracking-wider">Chaveamento Oficial</h2>
                   <p className="text-fg-muted text-sm mt-1">Confrontos organizados cronologicamente por horário. Clique no jogador para ver o perfil.</p>
+                </div>
+
+                <div className="max-w-xl mx-auto border border-ow-orange/50 bg-ow-orange/10 px-5 py-3 text-center rounded-xl shadow-[0_0_20px_rgba(249,158,26,0.12)]">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-ow-orange">Fase atual</p>
+                  <p className="text-sm font-semibold text-fg mt-1">O torneio está na 2ª Rodada.</p>
                 </div>
 
                 {/* Sub-abas de Rodadas */}
