@@ -649,7 +649,7 @@ export default function PublicoPage() {
             <div>
               <p className="text-xs uppercase tracking-[0.25em] text-ow-orange/90 font-semibold">Torneio Oficial · Akira</p>
               <h1 className="text-display text-4xl md:text-5xl font-bold uppercase leading-none mt-1">
-                Duel<span className="text-ow-orange">owach</span>
+                Duel<span className="text-ow-orange">owatch</span>
               </h1>
               <p className="text-fg-muted text-sm mt-2">Acompanhe o chaveamento ao vivo sincronizado com a planilha oficial.</p>
             </div>
@@ -668,22 +668,6 @@ export default function PublicoPage() {
           </div>
         </div>
       </header>
-
-      <div className="max-w-6xl mx-auto px-6 md:px-8 pt-6">
-        <div
-          role="alert"
-          className="border-2 border-danger/70 bg-danger/15 px-5 py-4 text-center text-danger shadow-[0_0_24px_rgba(239,68,68,0.18)]"
-        >
-          <p className="text-sm font-bold uppercase tracking-wider">Confirmação de presença obrigatória</p>
-          <p className="mt-1 text-sm font-semibold">
-            Mesmo que não consiga abrir o jogo, compareça à call “ME PUXE” no horário da sua partida.
-            A ausência na call resultará em W.O. imediato.
-          </p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-wider">
-            Leia no Discord o aviso completo sobre o reagendamento para domingo.
-          </p>
-        </div>
-      </div>
 
       {/* Abas */}
       <nav className="border-b border-line bg-surface/95 backdrop-blur-md sticky top-0 z-50 shadow-md">

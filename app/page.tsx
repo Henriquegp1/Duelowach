@@ -105,26 +105,12 @@ export default function LoginPage() {
 
           <div>
             <h1 className="text-display text-4xl font-bold uppercase tracking-wide drop-shadow-md">
-              Duel<span className="text-ow-orange">owach</span>
+              Duel<span className="text-ow-orange">owatch</span>
             </h1>
             <p className="text-fg-muted font-semibold uppercase tracking-widest text-sm mt-2 drop-shadow-md">
               Torneio Oficial do Akira
             </p>
           </div>
-        </div>
-
-        <div
-          role="alert"
-          className="border-2 border-danger/70 bg-danger/15 px-5 py-4 text-center text-danger shadow-[0_0_24px_rgba(239,68,68,0.18)]"
-        >
-          <p className="text-sm font-bold uppercase tracking-wider">Confirmação de presença obrigatória</p>
-          <p className="mt-1 text-sm font-semibold">
-            Mesmo que não consiga abrir o jogo, compareça à call “ME PUXE” no horário da sua partida.
-            A ausência na call resultará em W.O. imediato.
-          </p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-wider">
-            Leia no Discord o aviso completo sobre o reagendamento para domingo.
-          </p>
         </div>
 
         {/* Área Principal (Público) */}
