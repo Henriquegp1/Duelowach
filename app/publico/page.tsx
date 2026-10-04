@@ -815,7 +815,7 @@ export default function PublicoPage() {
                   <section className="order-0 lg:col-span-2 surface-card p-5 md:p-6 border border-ow-orange/50 bg-ow-orange/10 shadow-[0_0_24px_rgba(249,158,26,0.12)]">
                     <h2 className="text-display text-lg font-bold uppercase tracking-wider text-ow-orange">📢 Aviso importante</h2>
                     <p className="text-fg-muted text-sm leading-relaxed mt-2">
-                      O jogador ausente terá <strong className="text-fg">10 minutos</strong> para entrar na call antes do possível W.O.
+                      O jogador ausente terá <strong className="text-fg">5 minutos</strong> para entrar na call antes do possível W.O.
                     </p>
                   </section>
                 )}
