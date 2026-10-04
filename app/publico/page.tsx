@@ -182,26 +182,13 @@ function parseHorarioToTimestamp(horarioStr: string, year: number): number | nul
   return new Date(year, 9, day, Number(match[1]), Number(match[2])).getTime();
 }
 
-function determinarFaseAtual(rodadas: { id: string; data: MatchItem[] }[], agora: Date): string {
-  let ultimaFaseComHorarioEncerrada = -1;
+function partidaConcluida(match: MatchItem): boolean {
+  return match.status.toLowerCase() === "concluida" || Boolean(match.vencedor && match.vencedor !== "—");
+}
 
-  for (let index = 0; index < rodadas.length; index++) {
-    const horarios = rodadas[index].data
-      .map(match => parseHorarioToTimestamp(match.horario || "", agora.getFullYear()))
-      .filter((timestamp): timestamp is number => timestamp !== null);
-
-    if (!horarios.length) continue;
-
-    const inicio = Math.min(...horarios);
-    const fim = Math.max(...horarios) + 60 * 60 * 1000;
-    if (agora.getTime() < inicio || agora.getTime() <= fim) return rodadas[index].id;
-    ultimaFaseComHorarioEncerrada = index;
-  }
-
-  for (let index = ultimaFaseComHorarioEncerrada + 1; index < rodadas.length; index++) {
-    const partidas = rodadas[index].data;
-    const concluida = partidas.length > 0 && partidas.every(match => match.status === "concluida" || (match.vencedor !== "" && match.vencedor !== "—"));
-    if (!concluida) return rodadas[index].id;
+function determinarFaseAtual(rodadas: { id: string; data: MatchItem[] }[]): string {
+  for (const rodada of rodadas) {
+    if (rodada.data.length > 0 && !rodada.data.every(partidaConcluida)) return rodada.id;
   }
 
   return rodadas[rodadas.length - 1]?.id || "rodada1";
@@ -234,7 +221,7 @@ function extractHorario(cols: string[]): string {
 }
 
 function checkIsWO(horarioStr?: string, status?: string, vencedor?: string, scoreA?: string, scoreB?: string): boolean {
-  if (status === "concluida" || (vencedor && vencedor.trim() !== "" && vencedor !== "—")) return false;
+  if (status?.toLowerCase() === "concluida" || (vencedor && vencedor.trim() !== "" && vencedor !== "—")) return false;
   if (scoreA && scoreA !== "—" && scoreA !== "" && scoreB && scoreB !== "—" && scoreB !== "") return false;
 
   const v = (vencedor || "").toLowerCase();
@@ -242,23 +229,11 @@ function checkIsWO(horarioStr?: string, status?: string, vencedor?: string, scor
   if (v.includes("w.o") || v.includes("wo") || s.includes("w.o") || s.includes("wo")) {
     return true;
   }
-  if (!horarioStr) return false;
-
-  const lower = horarioStr.toLowerCase();
-  const match = lower.match(/(\d{1,2}):(\d{2})/);
-  if (!match) return false;
-
-  const hours = parseInt(match[1], 10);
-  const mins = parseInt(match[2], 10);
-
-  const matchDay = lower.includes("domingo") ? 4 : lower.includes("sexta") ? 2 : 3;
-  const matchDate = new Date(2026, 9, matchDay, hours, mins, 0).getTime();
-  const now = Date.now();
-  return now > matchDate + 60 * 60 * 1000;
+  return false;
 }
 
 function CardConfronto({ m }: { m: MatchItem }) {
-  const concluida = m.status === "concluida" || (m.vencedor !== "" && m.vencedor !== "—");
+  const concluida = partidaConcluida(m);
   const isWO = checkIsWO(m.horario, m.status, m.vencedor, m.scoreA, m.scoreB);
   const isBye = m.timeB === "BYE";
 
@@ -396,13 +371,13 @@ export default function PublicoPage() {
     const lines = csvText.split("\n").map(l => l.trim());
 
     let parsedRodada1: MatchItem[] = [];
-    let parsedRodada2: MatchItem[] = [];
-    let parsedOitavas: MatchItem[] = [];
-    let parsedQuartas: MatchItem[] = [];
-    let parsedSemifinais: MatchItem[] = [];
-    let parsedFinal: MatchItem[] = [];
-    let parsedPodio: PodioItem[] = [];
-    let parsedPartes: Participant[] = [];
+    const parsedRodada2: MatchItem[] = [];
+    const parsedOitavas: MatchItem[] = [];
+    const parsedQuartas: MatchItem[] = [];
+    const parsedSemifinais: MatchItem[] = [];
+    const parsedFinal: MatchItem[] = [];
+    const parsedPodio: PodioItem[] = [];
+    const parsedPartes: Participant[] = [];
 
     let currentSection = "";
 
@@ -491,21 +466,24 @@ export default function PublicoPage() {
           if (cols.length < 10 || (!cols[0]?.startsWith("Jogo") && !cols[0]?.startsWith("Oitavas") && !cols[0]?.startsWith("Quartas") && !cols[0]?.startsWith("Semifinal") && !cols[0]?.includes("Final"))) return null;
 
           const hor = extractHorario(cols);
-          const venc = cols[9] || "";
+          const horarioIndex = cols.findIndex(col => /(?:sábado|sabado|sexta|domingo).*\d{1,2}:\d{2}h?/i.test(col));
+          const formatoCompleto = horarioIndex >= 11;
+          const venc = formatoCompleto ? "" : cols[9] || "";
+          const status = formatoCompleto ? "pendente" : cols[10]?.toLowerCase() === "concluida" || (venc && venc !== "—") ? "concluida" : "pendente";
 
           return {
             id: cols[0] || "",
             fase: faseName,
             timeA: cols[1] || "",
             mainA: cols[2] || "",
-            plataformaA: cols[3] || "",
-            scoreA: cols[4] || "—",
-            scoreB: cols[5] || "—",
-            timeB: cols[6] || "",
-            mainB: cols[7] || "",
-            plataformaB: cols[8] || "",
+            plataformaA: formatoCompleto ? cols[4] || "" : cols[3] || "",
+            scoreA: formatoCompleto ? cols[5] || "—" : cols[4] || "—",
+            scoreB: formatoCompleto ? cols[6] || "—" : cols[5] || "—",
+            timeB: formatoCompleto ? cols[7] || "" : cols[6] || "",
+            mainB: formatoCompleto ? cols[8] || "" : cols[7] || "",
+            plataformaB: formatoCompleto ? cols[10] || "" : cols[8] || "",
             vencedor: venc,
-            status: (cols[10]?.toLowerCase() === "concluida" || (venc && venc !== "—")) ? "concluida" : "pendente",
+            status,
             horario: hor
           };
         };
@@ -641,7 +619,7 @@ export default function PublicoPage() {
     { id: "final", label: "Grande Final", data: grandeFinal },
   ];
 
-  const faseAtualId = determinarFaseAtual(rodadasTabs, agora);
+  const faseAtualId = determinarFaseAtual(rodadasTabs);
   const faseAtual = rodadasTabs.find(rodada => rodada.id === faseAtualId) || rodadasTabs[0];
   const proximaPartida = encontrarProximaPartida(rodadasTabs, faseAtualId, agora);
 
@@ -660,7 +638,7 @@ export default function PublicoPage() {
   const rodadaAtualAtiva = rodadasTabs.find(r => r.id === subAbaRodada) || rodadasTabs[0];
 
   const partidasFiltradas = rodadaAtualAtiva.data.filter(m => {
-    const concluida = m.status === "concluida" || (m.vencedor !== "" && m.vencedor !== "—");
+    const concluida = partidaConcluida(m);
     if (filtroStatus === "encerrado") return concluida;
     if (filtroStatus === "aguardando") return !concluida;
     return true;
