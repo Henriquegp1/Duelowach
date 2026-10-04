@@ -170,6 +170,43 @@ function parseHorarioToMinutes(horarioStr: string): number {
   return dayVal;
 }
 
+function parseHorarioToTimestamp(horarioStr: string, year: number): number | null {
+  if (!horarioStr) return null;
+  const lower = horarioStr.toLowerCase();
+  const match = lower.match(/(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+
+  const day = lower.includes("domingo") ? 4 : lower.includes("sexta") ? 2 : lower.includes("sábado") || lower.includes("sabado") ? 3 : null;
+  if (!day) return null;
+
+  return new Date(year, 9, day, Number(match[1]), Number(match[2])).getTime();
+}
+
+function determinarFaseAtual(rodadas: { id: string; data: MatchItem[] }[], agora: Date): string {
+  let ultimaFaseComHorarioEncerrada = -1;
+
+  for (let index = 0; index < rodadas.length; index++) {
+    const horarios = rodadas[index].data
+      .map(match => parseHorarioToTimestamp(match.horario || "", agora.getFullYear()))
+      .filter((timestamp): timestamp is number => timestamp !== null);
+
+    if (!horarios.length) continue;
+
+    const inicio = Math.min(...horarios);
+    const fim = Math.max(...horarios) + 60 * 60 * 1000;
+    if (agora.getTime() < inicio || agora.getTime() <= fim) return rodadas[index].id;
+    ultimaFaseComHorarioEncerrada = index;
+  }
+
+  for (let index = ultimaFaseComHorarioEncerrada + 1; index < rodadas.length; index++) {
+    const partidas = rodadas[index].data;
+    const concluida = partidas.length > 0 && partidas.every(match => match.status === "concluida" || (match.vencedor !== "" && match.vencedor !== "—"));
+    if (!concluida) return rodadas[index].id;
+  }
+
+  return rodadas[rodadas.length - 1]?.id || "rodada1";
+}
+
 function extractHorario(cols: string[]): string {
   for (let c = 0; c < cols.length; c++) {
     const val = cols[c] || "";
@@ -205,45 +242,6 @@ function checkIsWO(horarioStr?: string, status?: string, vencedor?: string, scor
   const matchDate = new Date(2026, 9, matchDay, hours, mins, 0).getTime();
   const now = Date.now();
   return now > matchDate + 60 * 60 * 1000;
-}
-
-function CountdownTimer() {
-  const [timeLeft, setTimeLeft] = useState({ dias: 0, horas: 0, minutos: 0, segundos: 0 });
-
-  useEffect(() => {
-    const targetDate = new Date("2026-10-03T19:30:00").getTime();
-
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const difference = targetDate - now;
-
-      if (difference > 0) {
-        const dias = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const horas = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutos = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-        const segundos = Math.floor((difference % (1000 * 60)) / 1000);
-        setTimeLeft({ dias, horas, minutos, segundos });
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="flex justify-center gap-2 md:gap-4 my-2">
-      {[
-        { label: "Dias", val: timeLeft.dias },
-        { label: "Horas", val: timeLeft.horas },
-        { label: "Minutos", val: timeLeft.minutos },
-        { label: "Segundos", val: timeLeft.segundos },
-      ].map((item, idx) => (
-        <div key={idx} className="surface-card px-3 md:px-4 py-2 md:py-3 rounded-xl border border-ow-orange/45 bg-surface-2 text-center min-w-[60px] md:min-w-[75px] shadow-md">
-          <span className="text-display text-xl md:text-3xl font-bold text-ow-orange tabular-nums block">{String(item.val).padStart(2, "0")}</span>
-          <span className="text-[9px] md:text-[10px] text-fg-dim uppercase tracking-widest">{item.label}</span>
-        </div>
-      ))}
-    </div>
-  );
 }
 
 function CardConfronto({ m }: { m: MatchItem }) {
@@ -362,10 +360,11 @@ function CardConfronto({ m }: { m: MatchItem }) {
 
 export default function PublicoPage() {
   const [aba, setAba] = useState<Aba>("inicio");
-  const [subAbaRodada, setSubAbaRodada] = useState<string>("rodada2");
+  const [subAbaRodada, setSubAbaRodada] = useState<string>("rodada1");
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "encerrado" | "aguardando">("todos");
   const [carregando, setCarregando] = useState(true);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
+  const [agora, setAgora] = useState(() => new Date());
   const [twitchParent, setTwitchParent] = useState<string | null>(null);
   const [modalPremio, setModalPremio] = useState<"lesserafim" | "sojourn" | null>(null);
   const [jogadorPerfil, setJogadorPerfil] = useState<{ nome: string; battletag: string; plataforma: string; vitorias: number; derrotas: number; totalJogos: number } | null>(null);
@@ -629,6 +628,21 @@ export default function PublicoPage() {
     { id: "final", label: "Grande Final", data: grandeFinal },
   ];
 
+  const faseAtualId = determinarFaseAtual(rodadasTabs, agora);
+  const faseAtual = rodadasTabs.find(rodada => rodada.id === faseAtualId) || rodadasTabs[0];
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setAgora(new Date()), 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (aba === "partidas") setSubAbaRodada(faseAtualId);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [aba, faseAtualId]);
+
   const rodadaAtualAtiva = rodadasTabs.find(r => r.id === subAbaRodada) || rodadasTabs[0];
 
   const partidasFiltradas = rodadaAtualAtiva.data.filter(m => {
@@ -755,7 +769,7 @@ export default function PublicoPage() {
                 {/* CARD 2: Status atual do torneio */}
                 <section className="surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 max-w-3xl mx-auto">
                   <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
-                    <span>⚔️</span> Torneio em andamento · 2ª Rodada
+                    <span>⚔️</span> Torneio em andamento · {faseAtual.label}
                   </h3>
                   <p className="text-sm text-fg-muted">Acompanhe as partidas da fase atual no chaveamento abaixo.</p>
                 </section>
@@ -793,7 +807,7 @@ export default function PublicoPage() {
 
                 <div className="max-w-xl mx-auto border border-ow-orange/50 bg-ow-orange/10 px-5 py-3 text-center rounded-xl shadow-[0_0_20px_rgba(249,158,26,0.12)]">
                   <p className="text-xs font-bold uppercase tracking-[0.2em] text-ow-orange">Fase atual</p>
-                  <p className="text-sm font-semibold text-fg mt-1">O torneio está na 2ª Rodada.</p>
+                  <p className="text-sm font-semibold text-fg mt-1">O torneio está na {faseAtual.label}.</p>
                 </div>
 
                 {/* Sub-abas de Rodadas */}
