@@ -190,6 +190,16 @@ function partidaConcluida(match: MatchItem): boolean {
   return match.status.toLowerCase() === "concluida" || Boolean(match.vencedor && match.vencedor !== "—") || temPlacar;
 }
 
+function determinarVencedor(match: MatchItem): string {
+  if (match.vencedor && match.vencedor !== "—") return match.vencedor;
+
+  const scoreA = Number(match.scoreA);
+  const scoreB = Number(match.scoreB);
+  if (!Number.isFinite(scoreA) || !Number.isFinite(scoreB) || scoreA === scoreB) return "";
+
+  return scoreA > scoreB ? match.timeA : match.timeB;
+}
+
 function determinarFaseAtual(rodadas: { id: string; data: MatchItem[] }[]): string {
   for (const rodada of rodadas) {
     if (rodada.data.length > 0 && !rodada.data.every(partidaConcluida)) return rodada.id;
@@ -238,6 +248,7 @@ function checkIsWO(horarioStr?: string, status?: string, vencedor?: string, scor
 
 function CardConfronto({ m }: { m: MatchItem }) {
   const concluida = partidaConcluida(m);
+  const vencedor = determinarVencedor(m);
   const isWO = checkIsWO(m.horario, m.status, m.vencedor, m.scoreA, m.scoreB);
   const isBye = m.timeB === "BYE";
 
@@ -265,8 +276,8 @@ function CardConfronto({ m }: { m: MatchItem }) {
             data-bt={m.battletagA}
             data-plat={m.plataformaA}
             className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
-              ${concluida && m.vencedor === m.timeA ? "bg-success/15" : ""}
-              ${concluida && m.vencedor !== m.timeA && m.vencedor !== "" && m.vencedor !== "—" && !isBye ? "opacity-40" : ""}
+              ${concluida && vencedor === m.timeA ? "bg-success/15" : ""}
+              ${concluida && vencedor !== m.timeA && vencedor !== "" && vencedor !== "—" && !isBye ? "opacity-40" : ""}
             `}
           >
             <div className="flex items-center gap-3 sm:gap-4 truncate">
@@ -277,7 +288,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
                 {m.timeA ? m.timeA.substring(0, 2).toUpperCase() : "—"}
               </div>
               <div className="truncate space-y-0.5">
-                <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && m.vencedor === m.timeA ? "text-success" : "text-fg"}`}>
+                <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && vencedor === m.timeA ? "text-success" : "text-fg"}`}>
                   {m.timeA || "A definir"}
                 </span>
                 {m.mainA && m.mainA !== "-" ? (
@@ -304,8 +315,8 @@ function CardConfronto({ m }: { m: MatchItem }) {
               data-bt={m.battletagB}
               data-plat={m.plataformaB}
               className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
-                ${concluida && m.vencedor === m.timeB ? "bg-success/15" : ""}
-                ${concluida && m.vencedor !== m.timeB && m.vencedor !== "" && m.vencedor !== "—" ? "opacity-40" : ""}
+                ${concluida && vencedor === m.timeB ? "bg-success/15" : ""}
+                ${concluida && vencedor !== m.timeB && vencedor !== "" && vencedor !== "—" ? "opacity-40" : ""}
               `}
             >
               <div className="flex items-center gap-3 sm:gap-4 truncate">
@@ -316,7 +327,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
                   {m.timeB ? m.timeB.substring(0, 2).toUpperCase() : "—"}
                 </div>
                 <div className="truncate space-y-0.5">
-                  <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && m.vencedor === m.timeB ? "text-success" : "text-fg"}`}>
+                  <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && vencedor === m.timeB ? "text-success" : "text-fg"}`}>
                     {m.timeB || "A definir"}
                   </span>
                   {m.mainB && m.mainB !== "-" ? (
@@ -340,9 +351,9 @@ function CardConfronto({ m }: { m: MatchItem }) {
         }`}>
           {concluida ? "Encerrado" : isWO ? "⚠️ W.O. Aplicado (Atrasado +1h)" : "Aguardando"}
         </span>
-        {concluida && m.vencedor && m.vencedor !== "—" && (
+        {concluida && vencedor && vencedor !== "—" && (
           <span className="text-xs text-fg-dim truncate">
-            Vencedor: <span className="text-success font-bold uppercase tracking-wide">{m.vencedor}</span>
+            Vencedor: <span className="text-success font-bold uppercase tracking-wide">{vencedor}</span>
           </span>
         )}
       </div>
