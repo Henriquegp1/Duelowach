@@ -20,8 +20,8 @@ const rajdhani = Rajdhani({
 });
 
 export const metadata: Metadata = {
-  title: "Duelowach — Torneio Oficial do Akira",
-  description: "Plataforma oficial do torneio Duelowach — acompanhe o chaveamento, partidas e pódio ao vivo.",
+  title: "Duelowatch — Torneio Oficial do Akira",
+  description: "Plataforma oficial do torneio Duelowatch — acompanhe o chaveamento, partidas e pódio ao vivo.",
 };
 
 export default function RootLayout({

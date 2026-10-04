@@ -724,7 +724,7 @@ export default function PublicoPage() {
                     </span>
 
                     <h2 className="text-display text-4xl md:text-6xl font-bold uppercase tracking-wide">
-                      Bem-vindo ao <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Duelowach</span>
+                      Bem-vindo ao <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Duelowatch</span>
                     </h2>
 
                     <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
@@ -902,7 +902,7 @@ export default function PublicoPage() {
             {aba === "regras" && (
               <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="text-center">
-                  <h2 className="text-display text-3xl font-bold uppercase tracking-wider">Regras do Duelowach</h2>
+                  <h2 className="text-display text-3xl font-bold uppercase tracking-wider">Regras do Duelowatch</h2>
                   <p className="text-fg-muted text-sm mt-1">Entenda o formato e a dinâmica da competição.</p>
                 </div>
 
