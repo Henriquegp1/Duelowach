@@ -728,6 +728,13 @@ export default function PublicoPage() {
             {/* INÍCIO & PREMIAÇÃO */}
             {aba === "inicio" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <section className="order-0 lg:col-span-2 surface-card p-5 md:p-6 border border-ow-orange/50 bg-ow-orange/10 shadow-[0_0_24px_rgba(249,158,26,0.12)]">
+                  <h2 className="text-display text-lg font-bold uppercase tracking-wider text-ow-orange">📢 Aviso importante</h2>
+                  <p className="text-fg-muted text-sm leading-relaxed mt-2">
+                    Apenas na <strong className="text-fg">1ª rodada</strong> o jogo pode ser adiantado se os dois jogadores estiverem na call. Com apenas um jogador presente, aguarde o horário marcado. Nas demais etapas, siga a sequência do chaveamento: o jogador ausente terá <strong className="text-fg">10 minutos</strong> para entrar na call antes do possível W.O.
+                  </p>
+                </section>
+
                 {/* CARD 1: Hero Banner com Boas-Vindas e Premiação */}
                 <section className="order-3 lg:col-span-2 relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
                   <div className="absolute inset-0 hero-grad opacity-40 pointer-events-none" />
