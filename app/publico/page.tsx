@@ -207,6 +207,19 @@ function determinarFaseAtual(rodadas: { id: string; data: MatchItem[] }[], agora
   return rodadas[rodadas.length - 1]?.id || "rodada1";
 }
 
+function encontrarProximaPartida(rodadas: { id: string; data: MatchItem[] }[], faseAtualId: string, agora: Date): MatchItem | null {
+  const pendente = (match: MatchItem) => match.status !== "concluida" && (!match.vencedor || match.vencedor === "—");
+  const partidasAgendadas = rodadas
+    .flatMap(rodada => rodada.data)
+    .filter(match => pendente(match))
+    .map(match => ({ match, timestamp: parseHorarioToTimestamp(match.horario || "", agora.getFullYear()) }))
+    .filter(item => item.timestamp !== null && item.timestamp >= agora.getTime())
+    .sort((a, b) => (a.timestamp as number) - (b.timestamp as number));
+
+  if (partidasAgendadas[0]) return partidasAgendadas[0].match;
+  return rodadas.find(rodada => rodada.id === faseAtualId)?.data.find(pendente) || null;
+}
+
 function extractHorario(cols: string[]): string {
   for (let c = 0; c < cols.length; c++) {
     const val = cols[c] || "";
@@ -630,6 +643,7 @@ export default function PublicoPage() {
 
   const faseAtualId = determinarFaseAtual(rodadasTabs, agora);
   const faseAtual = rodadasTabs.find(rodada => rodada.id === faseAtualId) || rodadasTabs[0];
+  const proximaPartida = encontrarProximaPartida(rodadasTabs, faseAtualId, agora);
 
   useEffect(() => {
     const timer = window.setInterval(() => setAgora(new Date()), 60 * 1000);
@@ -772,6 +786,27 @@ export default function PublicoPage() {
                     <span>⚔️</span> Torneio em andamento · {faseAtual.label}
                   </h3>
                   <p className="text-sm text-fg-muted">Acompanhe as partidas da fase atual no chaveamento abaixo.</p>
+                </section>
+
+                <section className="surface-card max-w-3xl mx-auto rounded-3xl p-6 md:p-8 border border-ow-blue/40 shadow-xl bg-surface-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-line pb-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-ow-blue font-bold">Próximo jogo</p>
+                      <h3 className="text-display text-xl font-bold uppercase text-fg mt-1">
+                        {proximaPartida?.horario || "Horário a definir"}
+                      </h3>
+                    </div>
+                    <span className="text-xs uppercase tracking-wider text-fg-dim">{faseAtual.label}</span>
+                  </div>
+                  {proximaPartida ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center gap-3 pt-5 text-center">
+                      <span className="surface-card border border-line px-4 py-3 font-bold text-fg">{proximaPartida.timeA || "A definir"}</span>
+                      <span className="text-ow-orange font-bold text-sm">VS</span>
+                      <span className="surface-card border border-line px-4 py-3 font-bold text-fg">{proximaPartida.timeB || "A definir"}</span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-fg-muted text-center pt-5">Nenhum próximo confronto foi definido.</p>
+                  )}
                 </section>
 
                 {/* Transmissão do Akira */}
