@@ -810,7 +810,7 @@ export default function PublicoPage() {
                 </section>
 
                 {/* Transmissão do Akira */}
-                <section>
+                <section className="order-4">
                   <h2 className="text-display text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
                     <span className="text-ow-orange">✦</span> Transmissão Oficial
                   </h2>
