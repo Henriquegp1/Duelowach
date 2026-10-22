@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 
 const SHEET_API_URL = "/api/sheet";
 
+// Configuração do evento atual. Recursos de outros formatos ficam ocultos (e não removidos) por flag,
+// para que possam ser reativados em futuros Duelowatch sem reescrever código.
+const EVENTO = {
+  nome: "Além do Elo",
+  convidado: "Kira",
+  partidaUnica: true,      // cada duelo é uma partida só; vencer uma vez já garante o prêmio
+  mostrarDesempate: false, // oculto: não se aplica a partida única
+};
+
 const FALLBACK_CSV = `
 ,,,,,,,,,,
 ⚔️ ALÉM DO ELO,,,,,TOTAL DUELOS,CONCLUÍDOS,PENDENTES,TOTAL JOGADORES,,
@@ -103,7 +112,7 @@ Posicao,Jogador,Título,Medalha,,,,,,,
 
 const EVENT_FALLBACK_CSV = `
 ,Além do Elo,,,,,,,,,,,,
-,Formato especial • Kira contra 20 • Melhor de 3 (MD3),,,,,,,,,,,,
+,Formato especial • Kira contra 20 • Partida única (BO1),,,,,,,,,,,,
 ,,,,,,,,,,,,,
 ,Confronto,Jogador A,BattleTag A,Main A,Plataforma A,Placar A,Placar B,Jogador B,BattleTag B,Main B,Plataforma B,Vencedor,Status
 ,Jogo 01,Kira,,,-,,,20,,,-,,Pendente
@@ -151,7 +160,7 @@ const CONFETTI_PARTICLES = Array.from({ length: 72 }, (_, index) => ({
   delay: (index % 18) * 0.11,
   duration: 3.2 + (index % 7) * 0.28,
   rotation: (index * 47) % 360,
-  color: ["#F99E1A", "#218FFE", "#22C55E", "#E6EDF7", "#EF4444"][index % 5],
+  color: ["#F99E1A", "#218FFE", "#E6EDF7"][index % 3],
   shape: index % 3 === 0 ? "rounded-sm" : "rounded-[1px]"
 }));
 
@@ -322,7 +331,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
             data-bt={m.battletagA}
             data-plat={m.plataformaA}
             className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
-              ${concluida && vencedor === m.timeA ? "bg-success/15" : ""}
+              ${concluida && vencedor === m.timeA ? "bg-ow-blue/15" : ""}
               ${concluida && vencedor !== m.timeA && vencedor !== "" && vencedor !== "—" && !isBye ? "opacity-40" : ""}
             `}
           >
@@ -334,7 +343,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
                 {m.timeA ? m.timeA.substring(0, 2).toUpperCase() : "—"}
               </div>
               <div className="truncate space-y-0.5">
-                <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && vencedor === m.timeA ? "text-success" : "text-fg"}`}>
+                <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && vencedor === m.timeA ? "text-ow-blue" : "text-fg"}`}>
                   {m.timeA || "A definir"}
                 </span>
                 {m.mainA && m.mainA !== "-" ? (
@@ -361,7 +370,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
               data-bt={m.battletagB}
               data-plat={m.plataformaB}
               className={`flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 cursor-pointer hover:bg-surface-2/60 transition-colors
-                ${concluida && vencedor === m.timeB ? "bg-success/15" : ""}
+                ${concluida && vencedor === m.timeB ? "bg-ow-blue/15" : ""}
                 ${concluida && vencedor !== m.timeB && vencedor !== "" && vencedor !== "—" ? "opacity-40" : ""}
               `}
             >
@@ -373,7 +382,7 @@ function CardConfronto({ m }: { m: MatchItem }) {
                   {m.timeB ? m.timeB.substring(0, 2).toUpperCase() : "—"}
                 </div>
                 <div className="truncate space-y-0.5">
-                  <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && vencedor === m.timeB ? "text-success" : "text-fg"}`}>
+                  <span className={`text-sm sm:text-base font-bold uppercase tracking-wide block truncate underline-offset-4 hover:underline ${concluida && vencedor === m.timeB ? "text-ow-blue" : "text-fg"}`}>
                     {m.timeB || "A definir"}
                   </span>
                   {m.mainB && m.mainB !== "-" ? (
@@ -392,14 +401,14 @@ function CardConfronto({ m }: { m: MatchItem }) {
       {/* Footer Status */}
       <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-5 py-2.5 sm:py-3 bg-surface-2 border-t border-line gap-2">
         <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
-          concluida ? "bg-success/15 text-success border-success/30" :
-          isWO ? "bg-danger/20 text-danger border-danger/40 animate-pulse" : "bg-surface-2 text-fg-muted border-line"
+          concluida ? "bg-ow-blue/15 text-ow-blue border-ow-blue/30" :
+          isWO ? "bg-ow-orange/20 text-ow-orange border-ow-orange/40 animate-pulse" : "bg-surface-2 text-fg-muted border-line"
         }`}>
           {concluida ? "Encerrado" : isWO ? "⚠️ W.O. Aplicado (Atrasado +1h)" : "Aguardando"}
         </span>
         {concluida && vencedor && vencedor !== "—" && (
           <span className="text-xs text-fg-dim truncate">
-            Vencedor: <span className="text-success font-bold uppercase tracking-wide">{vencedor}</span>
+            Vencedor: <span className="text-ow-blue font-bold uppercase tracking-wide">{vencedor}</span>
           </span>
         )}
       </div>
@@ -694,9 +703,22 @@ export default function PublicoPage() {
   const faseAtual = rodadasTabs.find(rodada => rodada.id === faseAtualId) || rodadasTabs[0];
   const proximaPartida = encontrarProximaPartida(rodadasTabs, faseAtualId, agora);
 
-  const vencedorFinal = grandeFinal.length > 0 && grandeFinal.every(partidaConcluida)
-    ? determinarVencedor(grandeFinal[0])
-    : "";
+  // Além do Elo: o primeiro participante que vencer a Kira já leva o prêmio (sem segunda chance).
+  const duelosConcluidos = EVENTO.partidaUnica ? rodada1.filter(partidaConcluida) : [];
+  const primeiroDueloVencido = duelosConcluidos.find(m => {
+    const w = determinarVencedor(m).trim().toLowerCase();
+    return w !== "" && w !== EVENTO.convidado.toLowerCase();
+  });
+  const kiraVenceuEvento = EVENTO.partidaUnica
+    && rodada1.length > 0
+    && duelosConcluidos.length === rodada1.length
+    && !primeiroDueloVencido;
+
+  const vencedorFinal = primeiroDueloVencido
+    ? determinarVencedor(primeiroDueloVencido)
+    : grandeFinal.length > 0 && grandeFinal.every(partidaConcluida)
+      ? determinarVencedor(grandeFinal[0])
+      : "";
 
   useEffect(() => {
     const atualizarCelebracao = () => {
@@ -831,6 +853,15 @@ export default function PublicoPage() {
                   </section>
                 )}
 
+                {kiraVenceuEvento && (
+                  <section className="order-0 lg:col-span-2 ow-rise surface-card p-5 md:p-6 border border-ow-blue/50 bg-ow-blue/10">
+                    <h2 className="text-display text-lg font-bold uppercase tracking-wider text-ow-blue">🏆 A Kira venceu todos os duelos</h2>
+                    <p className="text-fg-muted text-sm leading-relaxed mt-2">
+                      Nenhum participante venceu a Kira. O <strong className="text-fg">bundle de Solo Leveling</strong> fica com ela.
+                    </p>
+                  </section>
+                )}
+
                 {/* CARD 1: Hero Banner do evento */}
                 <section className="order-3 lg:col-span-2 relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
                   <div className="absolute inset-0 hero-grad opacity-40 pointer-events-none" />
@@ -846,7 +877,7 @@ export default function PublicoPage() {
                     </h2>
 
                     <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
-                      A Kira enfrenta todos os participantes em duelos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3). Quem vencer a Kira leva o prêmio do evento.
+                      A Kira enfrenta <strong className="text-fg font-bold">20 participantes</strong> em duelos 1v1 de <strong className="text-fg font-bold">partida única</strong>. Quem vencer a Kira uma vez já leva o prêmio, sem segunda chance. Se ninguém vencer, a Kira fica com a premiação.
                     </p>
 
                     <div className="surface-card max-w-md mx-auto p-6 border-2 border-ow-orange rounded-2xl bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)]">
@@ -889,7 +920,7 @@ export default function PublicoPage() {
                 </section>
 
                 {/* Convidado especial */}
-                <section className="order-4 lg:col-span-2">
+                <section className="order-4 lg:col-span-2 ow-rise">
                   <h2 className="text-display text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
                     <span className="text-ow-orange">✦</span> Convidado especial
                   </h2>
@@ -900,7 +931,7 @@ export default function PublicoPage() {
                       href="https://www.instagram.com/kira_owbr?srtk=cjVkYmR2NDJtaGU0"
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex mt-5 rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
+                      className="ow-btn inline-flex mt-5 rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
                     >
                       Ver Instagram da Kira
                     </a>
@@ -908,9 +939,17 @@ export default function PublicoPage() {
                       href="https://www.twitch.tv/akiralegacy"
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex mt-3 rounded-full border border-ow-orange/50 px-5 py-2 text-sm font-semibold text-ow-orange transition-colors hover:bg-ow-orange/15"
+                      className="ow-btn inline-flex mt-3 rounded-full border border-ow-orange/50 px-5 py-2 text-sm font-semibold text-ow-orange transition-colors hover:bg-ow-orange/15"
                     >
                       Assistir na Twitch do Akira
+                    </a>
+                    <a
+                      href="https://www.tiktok.com/@kira_ow"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="ow-btn inline-flex mt-3 rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
+                    >
+                      TikTok da Kira
                     </a>
                   </div>
                 </section>
@@ -936,7 +975,7 @@ export default function PublicoPage() {
                     <button
                       key={r.id}
                       onClick={() => setSubAbaRodada(r.id)}
-                      className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all ${
+                      className={`ow-btn px-4 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all ${
                         subAbaRodada === r.id
                           ? "bg-ow-orange text-background border-ow-orange shadow-[0_0_15px_rgba(249,158,26,0.4)]"
                           : "surface-card text-fg-muted hover:text-fg border-line"
@@ -957,7 +996,7 @@ export default function PublicoPage() {
                     <button
                       key={f.id}
                       onClick={() => setFiltroStatus(f.id as any)}
-                      className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider rounded-lg border transition-all ${
+                      className={`ow-btn px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider rounded-lg border transition-all ${
                         filtroStatus === f.id
                           ? "bg-ow-blue/20 text-ow-blue border-ow-blue/40 shadow-sm"
                           : "bg-surface-2 text-fg-dim border-line hover:text-fg"
@@ -1041,17 +1080,17 @@ export default function PublicoPage() {
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">⚔️ Formato: Kira contra todos</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      A Kira enfrenta cada participante em uma série melhor de 3 (MD3), usando Doomfist. Cada confronto é independente e o chaveamento serve para acompanhar todos os duelos do evento.
+                      A Kira enfrenta cada participante em uma partida única, usando Doomfist. Cada duelo é independente e o chaveamento serve para acompanhar todos os duelos do evento.
                     </p>
                   </div>
 
                   <div className="surface-card p-6 space-y-3 border-ow-orange/40">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🏆 Vitória e premiação</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Quem vencer a Kira leva o <strong className="text-fg">bundle de Solo Leveling</strong>. Se ninguém conseguir vencer a Kira, ela será a vencedora do evento e ficará com a premiação.
+                      Quem vencer a Kira <strong className="text-fg">uma vez</strong> leva o <strong className="text-fg">bundle de Solo Leveling</strong> imediatamente, sem segunda chance. Se ninguém conseguir vencer a Kira nos 20 duelos, ela será a vencedora do evento e ficará com a premiação.
                     </p>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Cada confronto segue a ordem e o horário definidos no chaveamento. O jogador ausente terá <strong className="text-fg">10 minutos</strong> para entrar na call; depois disso, poderá ser aplicado <strong className="text-fg">W.O.</strong>
+                      Cada confronto segue a ordem e o horário definidos no chaveamento. O jogador ausente terá <strong className="text-fg">5 minutos</strong> para entrar na call; depois disso, poderá ser aplicado <strong className="text-fg">W.O.</strong>
                     </p>
                   </div>
 
@@ -1063,18 +1102,20 @@ export default function PublicoPage() {
                   </div>
 
                   <div className="surface-card p-6 space-y-2">
-                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎮 Partidas em MD3</h3>
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎮 Partida única</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Todas as partidas são disputadas em <strong className="text-fg">Melhor de 3 (MD3)</strong>. A Kira joga com seu main, Doomfist; o adversário utiliza seu próprio main.
+                      Todas as partidas são disputadas em <strong className="text-fg">partida única (BO1)</strong>. A Kira joga com seu main, Doomfist; o adversário utiliza seu próprio main.
                     </p>
                   </div>
 
+                  {EVENTO.mostrarDesempate && (
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎲 Desempate</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
                       Em caso de empate na série, será utilizado um herói secreto e aleatório, conforme definido pela organização.
                     </p>
                   </div>
+                  )}
 
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🔒 Regra dos Mains</h3>
@@ -1127,11 +1168,11 @@ export default function PublicoPage() {
 
             <div className="grid grid-cols-3 gap-3 pt-3 border-t border-line">
               <div className="bg-surface-2 p-3 rounded-xl border border-line">
-                <span className="text-display text-xl font-bold text-success block">{jogadorPerfil.vitorias}</span>
+                <span className="text-display text-xl font-bold text-ow-blue block">{jogadorPerfil.vitorias}</span>
                 <span className="text-[10px] uppercase tracking-wider text-fg-dim">Vitórias</span>
               </div>
               <div className="bg-surface-2 p-3 rounded-xl border border-line">
-                <span className="text-display text-xl font-bold text-danger block">{jogadorPerfil.derrotas}</span>
+                <span className="text-display text-xl font-bold text-ow-orange block">{jogadorPerfil.derrotas}</span>
                 <span className="text-[10px] uppercase tracking-linejoin uppercase tracking-wider text-fg-dim">Derrotas</span>
               </div>
               <div className="bg-surface-2 p-3 rounded-xl border border-line">

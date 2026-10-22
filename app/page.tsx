@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -10,6 +10,13 @@ export default function LoginPage() {
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const router = useRouter();
+
+  // Twitch exige o domínio atual no parâmetro "parent" do player (vazio no servidor, sem erro de hidratação).
+  const hostname = useSyncExternalStore(
+    () => () => {},
+    () => window.location.hostname,
+    () => ""
+  );
 
   // Adicione este useEffect logo abaixo dos seus useState
   useEffect(() => {
@@ -113,11 +120,57 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Convidado especial: player do Akira + redes da Kira */}
+        {!mostrarLogin && (
+          <section className="ow-rise surface-card border border-ow-blue/40 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-line">
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-ow-blue">Convidado especial · Kira</span>
+              <span className="text-[10px] uppercase tracking-wider text-fg-dim">Akira ao vivo</span>
+            </div>
+            <div className="relative aspect-video bg-background">
+              {hostname && (
+                <iframe
+                  src={`https://player.twitch.tv/?channel=akiralegacy&parent=${hostname}&muted=true`}
+                  title="Canal do Akira na Twitch"
+                  className="absolute inset-0 w-full h-full"
+                  allowFullScreen
+                />
+              )}
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 p-5">
+              <a
+                href="https://www.instagram.com/kira_owbr"
+                target="_blank"
+                rel="noreferrer"
+                className="ow-btn inline-flex rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue hover:bg-ow-blue/15"
+              >
+                Instagram da Kira
+              </a>
+              <a
+                href="https://www.twitch.tv/akiralegacy"
+                target="_blank"
+                rel="noreferrer"
+                className="ow-btn inline-flex rounded-full border border-ow-orange/50 px-5 py-2 text-sm font-semibold text-ow-orange hover:bg-ow-orange/15"
+              >
+                Twitch do Akira
+              </a>
+              <a
+                href="https://www.tiktok.com/@kira_ow"
+                target="_blank"
+                rel="noreferrer"
+                className="ow-btn inline-flex rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue hover:bg-ow-blue/15"
+              >
+                TikTok da Kira
+              </a>
+            </div>
+          </section>
+        )}
+
         {/* Área Principal (Público) */}
         {!mostrarLogin && (
           <button
             onClick={() => router.push("/publico")}
-            className="group surface-card border-2 border-ow-orange/30 hover:border-ow-orange p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(249,158,26,0.5)]"
+            className="ow-btn group surface-card border-2 border-ow-orange/30 hover:border-ow-orange p-8 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_rgba(249,158,26,0.5)]"
           >
             <div className="text-ow-orange mb-4 flex justify-center transition-transform group-hover:scale-110">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12">

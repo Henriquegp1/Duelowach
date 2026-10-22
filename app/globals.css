@@ -204,3 +204,45 @@ body {
   opacity: 0.6;
   transform: rotate(45deg); /* Inclinação no mesmo ângulo da sua imagem */
 }
+
+/* --- Interações estilo Overwatch --- */
+@keyframes ow-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ow-rise {
+  animation: ow-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.ow-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.ow-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.22) 50%, transparent 70%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.ow-btn:hover {
+  transform: translateY(-2px);
+}
+.ow-btn:hover::after {
+  transform: translateX(120%);
+  transition: transform 0.6s ease;
+}
+.ow-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ow-rise,
+  .ow-btn,
+  .ow-btn::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
