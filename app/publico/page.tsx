@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 const SHEET_API_URL = "/api/sheet";
 
@@ -11,6 +11,10 @@ const EVENTO = {
   convidado: "Kira",
   partidaUnica: true,      // cada duelo é uma partida só; vencer uma vez já garante o prêmio
   mostrarDesempate: false, // oculto: não se aplica a partida única
+  mostrarAviso: false,     // oculto por enquanto: aviso de ausência na aba Início
+  bundleImagem: "/bundle-solo-leveling.jpg", // coloque a imagem do bundle em public/
+  kiraFoto: "/kira.jpg",                     // foto da Kira (Instagram) em public/
+  canalTwitch: "akiralegacy",
 };
 
 const FALLBACK_CSV = `
@@ -417,6 +421,13 @@ function CardConfronto({ m }: { m: MatchItem }) {
 }
 
 export default function PublicoPage() {
+  // Twitch exige o domínio atual no parâmetro "parent" do player (vazio no servidor).
+  const hostname = useSyncExternalStore(
+    () => () => {},
+    () => window.location.hostname,
+    () => ""
+  );
+
   const [aba, setAba] = useState<Aba>("inicio");
   const [subAbaRodada, setSubAbaRodada] = useState<string>("rodada1");
   const [filtroStatus, setFiltroStatus] = useState<"todos" | "encerrado" | "aguardando">("todos");
@@ -844,7 +855,7 @@ export default function PublicoPage() {
             {/* INÍCIO & PREMIAÇÃO */}
             {aba === "inicio" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {!vencedorFinal && (
+                {!vencedorFinal && EVENTO.mostrarAviso && (
                   <section className="order-0 lg:col-span-2 surface-card p-5 md:p-6 border border-ow-orange/50 bg-ow-orange/10 shadow-[0_0_24px_rgba(249,158,26,0.12)]">
                     <h2 className="text-display text-lg font-bold uppercase tracking-wider text-ow-orange">📢 Aviso importante</h2>
                     <p className="text-fg-muted text-sm leading-relaxed mt-2">
@@ -863,30 +874,75 @@ export default function PublicoPage() {
                 )}
 
                 {/* CARD 1: Hero Banner do evento */}
-                <section className="order-3 lg:col-span-2 relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
-                  <div className="absolute inset-0 hero-grad opacity-40 pointer-events-none" />
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-ow-orange/10 blur-[80px] pointer-events-none" />
+                <section className="order-3 lg:col-span-2 relative rounded-3xl overflow-hidden border border-ow-orange/30 shadow-[0_0_60px_rgba(249,158,26,0.18)] bg-gradient-to-b from-surface-2 to-surface">
+                  <div className="absolute inset-0 hero-grad opacity-50 pointer-events-none" />
+                  <div
+                    className="absolute inset-0 opacity-[0.05] pointer-events-none"
+                    style={{
+                      backgroundImage: "linear-gradient(var(--ow-orange) 1px, transparent 1px), linear-gradient(90deg, var(--ow-orange) 1px, transparent 1px)",
+                      backgroundSize: "40px 40px",
+                    }}
+                  />
+                  <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[28rem] h-48 bg-ow-orange/20 blur-[90px] pointer-events-none" />
 
-                  <div className="relative z-10 max-w-3xl mx-auto space-y-6">
-                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ow-orange/15 border border-ow-orange/40 text-ow-orange text-xs font-bold uppercase tracking-[0.25em]">
-                      ⚔️ Evento especial · Sábado, dia 24
-                    </span>
+                  <div className="relative z-10 grid md:grid-cols-[1.25fr_1fr] gap-8 p-6 md:p-10">
+                    <div className="space-y-5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="px-3 py-1 rounded-full bg-ow-orange text-background text-[11px] font-bold uppercase tracking-[0.2em]">EP. 01</span>
+                        <span className="px-3 py-1 rounded-full border border-ow-orange/40 text-ow-orange text-[11px] font-bold uppercase tracking-[0.2em]">Sábado, 24 de outubro</span>
+                      </div>
 
-                    <h2 className="text-display text-4xl md:text-6xl font-bold uppercase tracking-wide">
-                      Além do <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Elo</span>
-                    </h2>
+                      <div>
+                        <h2 className="text-display text-5xl md:text-6xl font-bold uppercase leading-none tracking-wide">
+                          Além do <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Elo</span>
+                        </h2>
+                        <p className="text-ow-blue text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mt-3">
+                          Bate-papo sobre High Elo com a Kira
+                        </p>
+                      </div>
 
-                    <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
-                      A Kira enfrenta <strong className="text-fg font-bold">20 participantes</strong> em duelos 1v1 de <strong className="text-fg font-bold">partida única</strong>. Quem vencer a Kira uma vez já leva o prêmio, sem segunda chance. Se ninguém vencer, a Kira fica com a premiação.
-                    </p>
+                      <p className="text-fg-muted leading-relaxed">
+                        Dicas, posicionamentos, estratégias e a experiência de quem chegou a <strong className="text-fg">Grão-Mestre / Champions</strong> no competitivo de Overwatch. Aprenda com quem chegou ao topo.
+                      </p>
 
-                    <div className="surface-card max-w-md mx-auto p-6 border-2 border-ow-orange rounded-2xl bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)]">
-                      <div className="text-5xl mb-3">🏆</div>
-                      <p className="text-xs uppercase tracking-[0.25em] text-ow-orange font-bold">Premiação</p>
-                      <h3 className="text-display text-2xl font-bold uppercase text-fg mt-2">Bundle de Solo Leveling</h3>
-                      <p className="text-sm text-fg-muted mt-2">O vencedor do evento leva o bundle.</p>
+                      <div className="rounded-2xl border border-ow-blue/40 bg-ow-blue/10 p-4">
+                        <p className="text-xs uppercase tracking-[0.2em] text-ow-blue font-bold">Desafio após a entrevista</p>
+                        <p className="text-sm text-fg mt-1 leading-relaxed">
+                          Quem se inscreveu pelo formulário pode enfrentar a Kira em um <strong>X1 (1v1)</strong> valendo o pacote de skins Solo Leveling.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {["20 duelos", "Partida única", "Sem segunda chance"].map((item) => (
+                          <span key={item} className="px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-[11px] font-semibold uppercase tracking-wider text-fg-muted">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
+                    <a
+                      href={EVENTO.bundleImagem}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="ow-btn group self-start w-full surface-card p-6 border-2 border-ow-orange rounded-2xl bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:shadow-[0_18px_40px_rgba(249,158,26,0.35)]"
+                    >
+                      <p className="text-xs uppercase tracking-[0.25em] text-ow-orange font-bold">Premiação</p>
+                      <div className="relative mt-4 aspect-[4/3] rounded-xl bg-surface-2 border border-line overflow-hidden flex items-center justify-center">
+                        <span className="text-6xl">🏆</span>
+                        <img
+                          src={EVENTO.bundleImagem}
+                          alt="Bundle de Solo Leveling"
+                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        />
+                      </div>
+                      <h3 className="text-display text-2xl font-bold uppercase text-fg mt-5">Bundle de Solo Leveling</h3>
+                      <p className="text-sm text-fg-muted mt-2">O vencedor do evento leva o bundle.</p>
+                      <span className="inline-flex mt-5 rounded-full bg-ow-orange px-4 py-2 text-xs font-bold uppercase tracking-wider text-background group-hover:bg-ow-orange-glow transition-colors">
+                        Ver bundle →
+                      </span>
+                    </a>
                   </div>
                 </section>
 
@@ -924,33 +980,66 @@ export default function PublicoPage() {
                   <h2 className="text-display text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
                     <span className="text-ow-orange">✦</span> Convidado especial
                   </h2>
-                  <div className="surface-card max-w-2xl mx-auto rounded-3xl p-8 text-center border border-ow-blue/40 shadow-xl bg-surface-2">
-                    <p className="text-xs uppercase tracking-[0.25em] text-ow-blue font-bold">Convidado</p>
-                    <h3 className="text-display text-3xl font-bold uppercase tracking-wider text-fg mt-2">Kira</h3>
-                    <a
-                      href="https://www.instagram.com/kira_owbr?srtk=cjVkYmR2NDJtaGU0"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="ow-btn inline-flex mt-5 rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
-                    >
-                      Ver Instagram da Kira
-                    </a>
-                    <a
-                      href="https://www.twitch.tv/akiralegacy"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="ow-btn inline-flex mt-3 rounded-full border border-ow-orange/50 px-5 py-2 text-sm font-semibold text-ow-orange transition-colors hover:bg-ow-orange/15"
-                    >
-                      Assistir na Twitch do Akira
-                    </a>
-                    <a
-                      href="https://www.tiktok.com/@kira_ow"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="ow-btn inline-flex mt-3 rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
-                    >
-                      TikTok da Kira
-                    </a>
+                  <div className="surface-card max-w-3xl mx-auto rounded-3xl overflow-hidden border border-ow-blue/40 shadow-xl bg-surface-2">
+                    <div className="flex flex-col sm:flex-row items-center gap-6 p-6 md:p-8 border-b border-line">
+                      <div className="relative w-28 h-28 shrink-0 rounded-2xl overflow-hidden border-2 border-ow-blue shadow-lg" style={{ background: "var(--grad-blue)" }}>
+                        <span className="absolute inset-0 flex items-center justify-center text-display text-3xl font-bold text-background">KI</span>
+                        <img
+                          src={EVENTO.kiraFoto}
+                          alt="Kira"
+                          className="absolute inset-0 w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        />
+                      </div>
+                      <div className="text-center sm:text-left">
+                        <p className="text-xs uppercase tracking-[0.25em] text-ow-blue font-bold">Convidado</p>
+                        <h3 className="text-display text-3xl font-bold uppercase tracking-wider text-fg mt-1">Kira</h3>
+                        <p className="text-sm text-fg-muted mt-1">Grão-Mestre / Champions no competitivo</p>
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-4">
+                          <a
+                            href="https://www.instagram.com/kira_owbr?srtk=cjVkYmR2NDJtaGU0"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="ow-btn inline-flex rounded-full border border-ow-blue/50 px-4 py-1.5 text-xs font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
+                          >
+                            Instagram
+                          </a>
+                          <a
+                            href="https://www.tiktok.com/@kira_ow"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="ow-btn inline-flex rounded-full border border-ow-blue/50 px-4 py-1.5 text-xs font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
+                          >
+                            TikTok
+                          </a>
+                          <a
+                            href={`https://www.twitch.tv/${EVENTO.canalTwitch}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="ow-btn inline-flex rounded-full border border-ow-orange/50 px-4 py-1.5 text-xs font-semibold text-ow-orange transition-colors hover:bg-ow-orange/15"
+                          >
+                            Twitch do Akira
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between px-6 py-3 border-b border-line">
+                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-ow-orange">Assistir ao vivo</span>
+                        <span className="text-[10px] uppercase tracking-wider text-fg-dim">Canal do Akira na Twitch</span>
+                      </div>
+                      <div className="relative aspect-video bg-background">
+                        {hostname && (
+                          <iframe
+                            src={`https://player.twitch.tv/?channel=${EVENTO.canalTwitch}&parent=${hostname}&muted=true`}
+                            title="Canal do Akira na Twitch"
+                            className="absolute inset-0 w-full h-full"
+                            allowFullScreen
+                          />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </section>
               </div>
