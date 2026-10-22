@@ -6,7 +6,7 @@ const SHEET_API_URL = "/api/sheet";
 
 const FALLBACK_CSV = `
 ,,,,,,,,,,
-⚔️ ESCALA DO DUELO,,,,,TOTAL DUELOS,CONCLUÍDOS,PENDENTES,TOTAL JOGADORES,,
+⚔️ ALÉM DO ELO,,,,,TOTAL DUELOS,CONCLUÍDOS,PENDENTES,TOTAL JOGADORES,,
 Quadro Oficial de Confrontos e Resultados do Torneio,,,,,32,1,31,64,,
 ,,,,,,,,,
 ,,,,,,,,,
@@ -406,8 +406,6 @@ export default function PublicoPage() {
   const [carregando, setCarregando] = useState(true);
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null);
   const [agora, setAgora] = useState(() => new Date());
-  const [twitchParent, setTwitchParent] = useState<string | null>(null);
-  const [modalPremio, setModalPremio] = useState<"lesserafim" | "sojourn" | null>(null);
   const [jogadorPerfil, setJogadorPerfil] = useState<{ nome: string; battletag: string; plataforma: string; vitorias: number; derrotas: number; totalJogos: number } | null>(null);
 
   const [rodada1, setRodada1] = useState<MatchItem[]>([]);
@@ -604,9 +602,6 @@ export default function PublicoPage() {
   };
 
   useEffect(() => {
-    const twitchParentTimer = window.setTimeout(() => {
-      setTwitchParent(window.location.hostname || "localhost");
-    }, 0);
     parseCSV(FALLBACK_CSV);
     setUltimaAtualizacao(new Date());
     setCarregando(false);
@@ -629,7 +624,6 @@ export default function PublicoPage() {
     const refreshTimer = window.setInterval(loadLiveData, 30 * 1000);
 
     return () => {
-      window.clearTimeout(twitchParentTimer);
       window.clearInterval(refreshTimer);
     };
   }, []);
@@ -664,7 +658,7 @@ export default function PublicoPage() {
   };
 
   const abas: { id: Aba; label: string }[] = [
-    { id: "inicio", label: "Início & Premiação" },
+    { id: "inicio", label: "Início" },
     { id: "partidas", label: "Chaveamento & Partidas" },
     { id: "podio", label: "Pódio" },
     { id: "regras", label: "Regras" },
@@ -761,11 +755,11 @@ export default function PublicoPage() {
               <path fill="#E6EDF7" d="m39.312 11.135-4.063 4.062a14.29 14.29 0 0 1 .995 16.159L28.891 24l-4.006-9.413h-.02V27.31l7.938 7.938a14.29 14.29 0 0 1-17.606 0l7.939-7.938V14.636l-4.027 9.365-7.355 7.355a14.29 14.29 0 0 1 .997-16.159l-4.063-4.062a20.001 20.001 0 1 0 30.624 0" />
             </svg>
             <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-ow-orange/90 font-semibold">Torneio Oficial · Akira</p>
+              <p className="text-xs uppercase tracking-[0.25em] text-ow-orange/90 font-semibold">Evento especial · Além do Elo</p>
               <h1 className="text-display text-4xl md:text-5xl font-bold uppercase leading-none mt-1">
                 Duel<span className="text-ow-orange">owatch</span>
               </h1>
-              <p className="text-fg-muted text-sm mt-2">Acompanhe o chaveamento ao vivo sincronizado com a planilha oficial.</p>
+              <p className="text-fg-muted text-sm mt-2">Sábado, dia 24 · Acompanhe o chaveamento sincronizado com a planilha oficial.</p>
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
@@ -775,9 +769,9 @@ export default function PublicoPage() {
               </span>
             )}
             {/* Selo Animado "AO VIVO" com Pulsação em Neon */}
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-danger/20 border border-danger/50 text-danger text-xs font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse">
-              <span className="w-2.5 h-2.5 rounded-full bg-danger shadow-[0_0_10px_#ef4444]" />
-              Ao Vivo
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-ow-orange/15 border border-ow-orange/50 text-ow-orange text-xs font-bold uppercase tracking-wider">
+              <span className="w-2.5 h-2.5 rounded-full bg-ow-orange shadow-[0_0_10px_#f99e1a]" />
+              Sábado, dia 24
             </span>
           </div>
         </div>
@@ -820,52 +814,24 @@ export default function PublicoPage() {
                   </section>
                 )}
 
-                {/* CARD 1: Hero Banner com Boas-Vindas e Premiação */}
+                {/* CARD 1: Hero Banner do evento */}
                 <section className="order-3 lg:col-span-2 relative rounded-3xl p-8 md:p-14 text-center overflow-hidden border border-ow-orange/30 shadow-[0_0_50px_rgba(249,158,26,0.15)] bg-gradient-to-b from-surface-2 to-surface">
                   <div className="absolute inset-0 hero-grad opacity-40 pointer-events-none" />
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-ow-orange/10 blur-[80px] pointer-events-none" />
 
                   <div className="relative z-10 max-w-3xl mx-auto space-y-6">
                     <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-ow-orange/15 border border-ow-orange/40 text-ow-orange text-xs font-bold uppercase tracking-[0.25em]">
-                      ⚔️ Torneio 1v1 Exclusivo · Organizado por Akira
+                      ⚔️ Evento especial · Sábado, dia 24
                     </span>
 
                     <h2 className="text-display text-4xl md:text-6xl font-bold uppercase tracking-wide">
-                      Bem-vindo ao <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Duelowatch</span>
+                      Além do <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Elo</span>
                     </h2>
 
                     <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
-                      Duelos intensos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3) com os mains de cada jogador e desempate com herói secreto e aleatório.
+                      Duelos intensos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3) com os mains de cada jogador e desempate com herói secreto e aleatório. Quem vencer leva o prêmio do evento.
                     </p>
 
-                    {/* Premiação Destaque (Clicável) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-                      <div
-                        onClick={() => setModalPremio("lesserafim")}
-                        className="surface-card p-6 border-2 border-ow-orange rounded-2xl relative overflow-hidden bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:scale-[1.02] transition-transform cursor-pointer group text-center"
-                      >
-                        <div className="absolute top-0 right-0 bg-ow-orange text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                          1º Lugar (Clique para ver)
-                        </div>
-                        <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🥇</div>
-                        <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-1">Grande Campeão</h3>
-                        <p className="text-fg font-bold text-lg">1º Bundle Le Sserafim</p>
-                        <span className="inline-block text-[11px] text-ow-orange underline mt-2 font-semibold">Ver imagem do prêmio →</span>
-                      </div>
-
-                      <div
-                        onClick={() => setModalPremio("sojourn")}
-                        className="surface-card p-6 border-2 border-line-strong rounded-2xl relative overflow-hidden bg-gradient-to-br from-surface-2 via-surface to-surface hover:scale-[1.02] transition-transform cursor-pointer group hover:border-ow-orange/50 text-center"
-                      >
-                        <div className="absolute top-0 right-0 bg-fg-muted text-background font-bold text-[10px] px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                          2º Lugar (Clique para ver)
-                        </div>
-                        <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">🥈</div>
-                        <h3 className="text-display text-xl font-bold uppercase text-fg mb-1">Vice-Campeão</h3>
-                        <p className="text-fg font-bold text-lg">Arma Mítica da Sojourn</p>
-                        <span className="inline-block text-[11px] text-ow-blue underline mt-2 font-semibold">Ver imagem do prêmio →</span>
-                      </div>
-                    </div>
                   </div>
                 </section>
 
@@ -898,24 +864,22 @@ export default function PublicoPage() {
                   )}
                 </section>
 
-                {/* Transmissão do Akira */}
+                {/* Convidado especial */}
                 <section className="order-4 lg:col-span-2">
                   <h2 className="text-display text-2xl font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
-                    <span className="text-ow-orange">✦</span> Transmissão Oficial
+                    <span className="text-ow-orange">✦</span> Convidado especial
                   </h2>
-                  <div className="max-w-2xl mx-auto">
-                    <div className="flex items-center gap-2 px-1 mb-3">
-                      <span className="w-3 h-3 rounded-full bg-danger live-dot animate-ping" />
-                      <h3 className="text-display text-xl font-bold uppercase tracking-wider text-fg">AkiraLegacy</h3>
-                    </div>
-                    <div className="aspect-video bg-surface-2 rounded-2xl overflow-hidden border border-line-strong shadow-2xl">
-                      {twitchParent && (
-                        <iframe
-                          src={`https://player.twitch.tv/?channel=akiralegacy&parent=${encodeURIComponent(twitchParent)}`}
-                          height="100%" width="100%" allowFullScreen className="border-none"
-                        />
-                      )}
-                    </div>
+                  <div className="surface-card max-w-2xl mx-auto rounded-3xl p-8 text-center border border-ow-blue/40 shadow-xl bg-surface-2">
+                    <p className="text-xs uppercase tracking-[0.25em] text-ow-blue font-bold">Convidado</p>
+                    <h3 className="text-display text-3xl font-bold uppercase tracking-wider text-fg mt-2">Kira</h3>
+                    <a
+                      href="https://www.instagram.com/kira_owbr?srtk=cjVkYmR2NDJtaGU0"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex mt-5 rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
+                    >
+                      Ver Instagram da Kira
+                    </a>
                   </div>
                 </section>
               </div>
@@ -1095,42 +1059,6 @@ export default function PublicoPage() {
 
       {vencedorFinal && celebracaoAte && (
         <ConfettiCelebration winner={vencedorFinal} />
-      )}
-
-      {/* Modal de Premiação */}
-      {modalPremio && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md p-4 animate-in fade-in duration-300"
-          onClick={() => setModalPremio(null)}
-        >
-          <div
-            className="surface-card max-w-4xl w-full p-6 md:p-8 border-2 border-ow-orange rounded-3xl relative shadow-2xl space-y-5 bg-surface"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center border-b border-line pb-4">
-              <h3 className="text-display text-2xl font-bold uppercase text-ow-orange flex items-center gap-2">
-                <span>{modalPremio === "lesserafim" ? "🥇" : "🥈"}</span>
-                {modalPremio === "lesserafim" ? "1º Lugar — Bundle Le Sserafim" : "2º Lugar — Arma Mítica da Sojourn"}
-              </h3>
-              <button
-                onClick={() => setModalPremio(null)}
-                className="w-10 h-10 rounded-full bg-surface-2 hover:bg-ow-orange hover:text-background flex items-center justify-center font-bold text-lg text-fg transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="rounded-2xl overflow-hidden border border-line bg-background flex items-center justify-center p-2 relative shadow-inner">
-              <img
-                src={modalPremio === "lesserafim" ? "/lesserafim.png" : "/sojourn.png"}
-                alt="Prêmio do Torneio"
-                className="max-h-[75vh] w-auto object-contain rounded-xl"
-              />
-            </div>
-            <p className="text-xs text-fg-dim text-center uppercase tracking-wider">
-              Clique no X ou fora da janela para fechar
-            </p>
-          </div>
-        </div>
       )}
 
       {/* Modal de Perfil do Jogador */}
