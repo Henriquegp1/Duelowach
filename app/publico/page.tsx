@@ -499,6 +499,9 @@ export default function PublicoPage() {
           const platB = planilhaAtual ? cols[10] || "" : cols[7] || "";
           const venc = planilhaAtual ? cols[11] || "" : cols[8] || "";
           if (!pA && !pB) continue;
+          const kiraIsA = pA.trim().toLowerCase() === "kira";
+          const adversario = [pA, pB].find(nome => nome.trim() && nome.trim().toLowerCase() !== "kira") || "";
+          if (!adversario) continue;
 
           let hor = "";
           for (let c = planilhaAtual ? 13 : 9; c < cols.length; c++) {
@@ -511,23 +514,25 @@ export default function PublicoPage() {
           parsedRodada1.push({
             id: "",
             fase: "1ª Rodada",
-            timeA: pA,
-            battletagA: btA,
-            mainA,
-            plataformaA: platA,
-            scoreA: scA,
-            timeB: pB,
-            battletagB: btB,
-            mainB,
-            plataformaB: platB,
-            scoreB: scB,
+            timeA: "Kira",
+            battletagA: kiraIsA ? btA : btB,
+            mainA: "Doomfist",
+            plataformaA: kiraIsA ? platA : platB,
+            scoreA: kiraIsA ? scA : scB,
+            timeB: adversario,
+            battletagB: kiraIsA ? btB : btA,
+            mainB: kiraIsA ? mainB : mainA,
+            plataformaB: kiraIsA ? platB : platA,
+            scoreB: kiraIsA ? scB : scA,
             vencedor: venc,
             status: venc && venc !== "—" ? "concluida" : "pendente",
             horario: hor
           });
 
-          if (pA) parsedPartes.push({ nome: pA, battletag: btA, plataforma: platA });
-          if (pB && pB !== "BYE") parsedPartes.push({ nome: pB, battletag: btB, plataforma: platB });
+          parsedPartes.push({ nome: "Kira", battletag: kiraIsA ? btA : btB, plataforma: kiraIsA ? platA : platB });
+          const adversarioBattletag = kiraIsA ? btB : btA;
+          const adversarioPlataforma = kiraIsA ? platB : platA;
+          if (adversario !== "BYE") parsedPartes.push({ nome: adversario, battletag: adversarioBattletag, plataforma: adversarioPlataforma });
         }
 
         const parseSubRodada = (cols: string[], faseName: string) => {
@@ -841,8 +846,15 @@ export default function PublicoPage() {
                     </h2>
 
                     <p className="text-fg-muted md:text-lg leading-relaxed max-w-2xl mx-auto">
-                      Duelos intensos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3) com os mains de cada jogador e desempate com herói secreto e aleatório. Quem vencer leva o prêmio do evento.
+                      A Kira enfrenta todos os participantes em duelos 1v1 no formato <strong className="text-fg font-bold">Ganhou, Passou</strong>, melhor de 3 (MD3). Quem vencer a Kira leva o prêmio do evento.
                     </p>
+
+                    <div className="surface-card max-w-md mx-auto p-6 border-2 border-ow-orange rounded-2xl bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)]">
+                      <div className="text-5xl mb-3">🏆</div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-ow-orange font-bold">Premiação</p>
+                      <h3 className="text-display text-2xl font-bold uppercase text-fg mt-2">Bundle de Solo Leveling</h3>
+                      <p className="text-sm text-fg-muted mt-2">O vencedor do evento leva o bundle.</p>
+                    </div>
 
                   </div>
                 </section>
@@ -891,6 +903,14 @@ export default function PublicoPage() {
                       className="inline-flex mt-5 rounded-full border border-ow-blue/50 px-5 py-2 text-sm font-semibold text-ow-blue transition-colors hover:bg-ow-blue/15"
                     >
                       Ver Instagram da Kira
+                    </a>
+                    <a
+                      href="https://www.twitch.tv/akiralegacy"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex mt-3 rounded-full border border-ow-orange/50 px-5 py-2 text-sm font-semibold text-ow-orange transition-colors hover:bg-ow-orange/15"
+                    >
+                      Assistir na Twitch do Akira
                     </a>
                   </div>
                 </section>
@@ -1019,19 +1039,19 @@ export default function PublicoPage() {
 
                 <div className="grid gap-4">
                   <div className="surface-card p-6 space-y-2">
-                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">⚔️ Formato: Ganhou, Passou</h3>
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">⚔️ Formato: Kira contra todos</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Torneio eliminatório. Quem vencer a série avança para a próxima fase. Quem perder está eliminado da competição principal.
+                      A Kira enfrenta cada participante em uma série melhor de 3 (MD3), usando Doomfist. Cada confronto é independente e o chaveamento serve para acompanhar todos os duelos do evento.
                     </p>
                   </div>
 
                   <div className="surface-card p-6 space-y-3 border-ow-orange/40">
-                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">📢 Horários, Call & Sequência</h3>
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🏆 Vitória e premiação</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      <strong className="text-fg">Somente na 1ª rodada</strong>, a partida pode ser adiantada se os dois jogadores estiverem presentes na call <strong className="text-fg">(ME PUXE)</strong>. Se apenas um jogador estiver na call, o confronto deve aguardar o horário marcado.
+                      Quem vencer a Kira leva o <strong className="text-fg">bundle de Solo Leveling</strong>. Se ninguém conseguir vencer a Kira, ela será a vencedora do evento e ficará com a premiação.
                     </p>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Nas demais etapas, não há horário fixo: os confrontos seguem a sequência do chaveamento. Quando a partida for chamada, o jogador ausente terá <strong className="text-fg">10 minutos</strong> para entrar na call; depois disso, poderá ser aplicado <strong className="text-fg">W.O.</strong>
+                      Cada confronto segue a ordem e o horário definidos no chaveamento. O jogador ausente terá <strong className="text-fg">10 minutos</strong> para entrar na call; depois disso, poderá ser aplicado <strong className="text-fg">W.O.</strong>
                     </p>
                   </div>
 
@@ -1043,23 +1063,23 @@ export default function PublicoPage() {
                   </div>
 
                   <div className="surface-card p-6 space-y-2">
-                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎮 Partidas em MD3 & Main vs Main</h3>
+                    <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎮 Partidas em MD3</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Todas as partidas são disputadas em **Melhor de 3 (MD3)**. Cada participante joga com seu próprio main (ex: Genji vs Genji, Cassidy vs Cassidy).
+                      Todas as partidas são disputadas em <strong className="text-fg">Melhor de 3 (MD3)</strong>. A Kira joga com seu main, Doomfist; o adversário utiliza seu próprio main.
                     </p>
                   </div>
 
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🎲 Desempate</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Em caso de empate ou necessidade de desempate na série, será utilizado um **herói secreto e aleatório** sorteado para ambos os jogadores.
+                      Em caso de empate na série, será utilizado um herói secreto e aleatório, conforme definido pela organização.
                     </p>
                   </div>
 
                   <div className="surface-card p-6 space-y-2">
                     <h3 className="text-display text-lg font-bold uppercase text-ow-orange">🔒 Regra dos Mains</h3>
                     <p className="text-fg-muted text-sm leading-relaxed">
-                      Os mains dos jogadores nas fases avançadas só são revelados após a primeira parte do torneio, conforme atualização na planilha oficial.
+                      A Kira joga com Doomfist em todos os confrontos. O main de cada adversário é exibido conforme a atualização na planilha oficial.
                     </p>
                   </div>
                 </div>
