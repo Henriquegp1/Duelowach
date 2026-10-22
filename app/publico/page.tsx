@@ -885,51 +885,69 @@ export default function PublicoPage() {
                   />
                   <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[28rem] h-48 bg-ow-orange/20 blur-[90px] pointer-events-none" />
 
-                  <div className="relative z-10 grid md:grid-cols-[1.25fr_1fr] gap-8 p-6 md:p-10">
-                    <div className="space-y-5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="px-3 py-1 rounded-full bg-ow-orange text-background text-[11px] font-bold uppercase tracking-[0.2em]">EP. 01</span>
-                        <span className="px-3 py-1 rounded-full border border-ow-orange/40 text-ow-orange text-[11px] font-bold uppercase tracking-[0.2em]">Sábado, 24 de outubro</span>
-                      </div>
+                  <div className="relative z-10 grid md:grid-cols-[1.3fr_1fr] gap-10 p-6 md:p-10">
+                    {/* Coluna esquerda */}
+                    <div className="flex flex-col justify-between gap-8">
+                      <div className="space-y-6">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="px-3 py-1 rounded-full bg-ow-orange text-background text-[11px] font-bold uppercase tracking-[0.2em]">EP. 01</span>
+                          <span className="px-3 py-1 rounded-full border border-ow-orange/40 text-ow-orange text-[11px] font-bold uppercase tracking-[0.2em]">Sábado, 24 de outubro</span>
+                        </div>
 
-                      <div>
-                        <h2 className="text-display text-5xl md:text-6xl font-bold uppercase leading-none tracking-wide">
-                          Além do <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Elo</span>
-                        </h2>
-                        <p className="text-ow-blue text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mt-3">
-                          Bate-papo sobre High Elo com a Kira
+                        <div>
+                          <h2 className="text-display text-5xl md:text-6xl font-bold uppercase leading-none tracking-wide">
+                            Além do <span className="text-ow-orange drop-shadow-[0_0_20px_rgba(249,158,26,0.5)]">Elo</span>
+                          </h2>
+                          <div className="h-[3px] w-24 bg-ow-orange shadow-[0_0_12px_var(--ow-orange-glow)] mt-4 rounded-full" />
+                          <p className="text-ow-blue text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mt-4">
+                            Bate-papo sobre High Elo com a Kira
+                          </p>
+                        </div>
+
+                        <p className="text-fg-muted leading-relaxed">
+                          Dicas, posicionamentos, estratégias e a experiência de quem chegou a <strong className="text-fg">Grão-Mestre / Champions</strong> no competitivo de Overwatch.
                         </p>
+
+                        <div className="rounded-2xl border border-ow-blue/40 bg-ow-blue/10 p-4">
+                          <p className="text-xs uppercase tracking-[0.2em] text-ow-blue font-bold">Desafio após a entrevista</p>
+                          <p className="text-sm text-fg mt-1 leading-relaxed">
+                            Quem se inscreveu pelo formulário pode enfrentar a Kira em um <strong>X1 (1v1)</strong> valendo o pacote de skins Solo Leveling.
+                          </p>
+                        </div>
                       </div>
 
-                      <p className="text-fg-muted leading-relaxed">
-                        Dicas, posicionamentos, estratégias e a experiência de quem chegou a <strong className="text-fg">Grão-Mestre / Champions</strong> no competitivo de Overwatch. Aprenda com quem chegou ao topo.
-                      </p>
-
-                      <div className="rounded-2xl border border-ow-blue/40 bg-ow-blue/10 p-4">
-                        <p className="text-xs uppercase tracking-[0.2em] text-ow-blue font-bold">Desafio após a entrevista</p>
-                        <p className="text-sm text-fg mt-1 leading-relaxed">
-                          Quem se inscreveu pelo formulário pode enfrentar a Kira em um <strong>X1 (1v1)</strong> valendo o pacote de skins Solo Leveling.
+                      <div className="space-y-6">
+                        <p className="text-display text-xl md:text-2xl font-bold uppercase tracking-wide text-fg border-l-4 border-ow-orange pl-4">
+                          Aprenda com quem chegou ao topo. <span className="text-ow-orange">Depois, desafie-o!</span>
                         </p>
-                      </div>
 
-                      <div className="flex flex-wrap gap-2">
-                        {["20 duelos", "Partida única", "Sem segunda chance"].map((item) => (
-                          <span key={item} className="px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-[11px] font-semibold uppercase tracking-wider text-fg-muted">
-                            {item}
-                          </span>
-                        ))}
+                        <div className="flex flex-wrap items-center gap-3">
+                          <button
+                            onClick={() => setAba("partidas")}
+                            className="ow-btn rounded-lg bg-ow-orange px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-background hover:bg-ow-orange-glow"
+                          >
+                            Acompanhar duelos →
+                          </button>
+                          {["20 duelos", "Partida única", "Sem segunda chance"].map((item) => (
+                            <span key={item} className="px-3 py-2 rounded-lg bg-surface-2 border border-line text-[11px] font-semibold uppercase tracking-wider text-fg-muted">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
+                    {/* Coluna direita: premiação */}
                     <a
                       href={EVENTO.bundleImagem}
                       target="_blank"
                       rel="noreferrer"
-                      className="ow-btn group self-start w-full surface-card p-6 border-2 border-ow-orange rounded-2xl bg-gradient-to-br from-ow-orange/10 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:shadow-[0_18px_40px_rgba(249,158,26,0.35)]"
+                      className="ow-btn group flex flex-col h-full surface-card p-6 border-2 border-ow-orange rounded-2xl bg-gradient-to-br from-ow-orange/15 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:shadow-[0_18px_40px_rgba(249,158,26,0.35)]"
                     >
                       <p className="text-xs uppercase tracking-[0.25em] text-ow-orange font-bold">Premiação</p>
-                      <div className="relative mt-4 aspect-[4/3] rounded-xl bg-surface-2 border border-line overflow-hidden flex items-center justify-center">
-                        <span className="text-6xl">🏆</span>
+
+                      <div className="relative mt-4 flex-1 min-h-[220px] rounded-xl border border-line overflow-hidden flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(249,158,26,0.25),transparent_70%)]">
+                        <span className="text-7xl drop-shadow-[0_0_25px_rgba(249,158,26,0.6)] transition-transform duration-500 group-hover:scale-110">🏆</span>
                         <img
                           src={EVENTO.bundleImagem}
                           alt="Bundle de Solo Leveling"
@@ -937,9 +955,10 @@ export default function PublicoPage() {
                           onError={(e) => { e.currentTarget.style.display = "none"; }}
                         />
                       </div>
+
                       <h3 className="text-display text-2xl font-bold uppercase text-fg mt-5">Bundle de Solo Leveling</h3>
                       <p className="text-sm text-fg-muted mt-2">O vencedor do evento leva o bundle.</p>
-                      <span className="inline-flex mt-5 rounded-full bg-ow-orange px-4 py-2 text-xs font-bold uppercase tracking-wider text-background group-hover:bg-ow-orange-glow transition-colors">
+                      <span className="inline-flex self-start mt-5 rounded-full bg-ow-orange px-4 py-2 text-xs font-bold uppercase tracking-wider text-background group-hover:bg-ow-orange-glow transition-colors">
                         Ver bundle →
                       </span>
                     </a>
