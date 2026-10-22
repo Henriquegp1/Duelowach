@@ -421,6 +421,14 @@ function CardConfronto({ m }: { m: MatchItem }) {
 }
 
 export default function PublicoPage() {
+  const [bundleAberto, setBundleAberto] = useState(false);
+  useEffect(() => {
+    if (!bundleAberto) return;
+    const fechar = (e: KeyboardEvent) => { if (e.key === "Escape") setBundleAberto(false); };
+    window.addEventListener("keydown", fechar);
+    return () => window.removeEventListener("keydown", fechar);
+  }, [bundleAberto]);
+
   // Twitch exige o domínio atual no parâmetro "parent" do player (vazio no servidor).
   const hostname = useSyncExternalStore(
     () => () => {},
@@ -874,16 +882,8 @@ export default function PublicoPage() {
                 )}
 
                 {/* CARD 1: Hero Banner do evento */}
-                <section className="order-3 lg:col-span-2 relative rounded-3xl overflow-hidden border border-ow-orange/30 shadow-[0_0_60px_rgba(249,158,26,0.18)] bg-gradient-to-b from-surface-2 to-surface">
-                  <div className="absolute inset-0 hero-grad opacity-50 pointer-events-none" />
-                  <div
-                    className="absolute inset-0 opacity-[0.05] pointer-events-none"
-                    style={{
-                      backgroundImage: "linear-gradient(var(--ow-orange) 1px, transparent 1px), linear-gradient(90deg, var(--ow-orange) 1px, transparent 1px)",
-                      backgroundSize: "40px 40px",
-                    }}
-                  />
-                  <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[28rem] h-48 bg-ow-orange/20 blur-[90px] pointer-events-none" />
+                <section className="order-3 lg:col-span-2 relative rounded-3xl overflow-hidden border border-line bg-surface shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)]">
+                  <div className="absolute top-0 inset-x-0 h-1 bg-ow-orange" />
 
                   <div className="relative z-10 grid md:grid-cols-[1.3fr_1fr] gap-10 p-6 md:p-10">
                     {/* Coluna esquerda */}
@@ -938,11 +938,10 @@ export default function PublicoPage() {
                     </div>
 
                     {/* Coluna direita: premiação */}
-                    <a
-                      href={EVENTO.bundleImagem}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="ow-btn group flex flex-col h-full surface-card p-6 border-2 border-ow-orange rounded-2xl bg-gradient-to-br from-ow-orange/15 via-surface to-surface shadow-[0_10px_30px_rgba(249,158,26,0.2)] hover:shadow-[0_18px_40px_rgba(249,158,26,0.35)]"
+                    <button
+                      type="button"
+                      onClick={() => setBundleAberto(true)}
+                      className="ow-btn group text-left flex flex-col h-full surface-card p-6 border border-ow-orange/60 rounded-2xl bg-surface-2 hover:border-ow-orange transition-colors"
                     >
                       <p className="text-xs uppercase tracking-[0.25em] text-ow-orange font-bold">Premiação</p>
 
@@ -961,7 +960,7 @@ export default function PublicoPage() {
                       <span className="inline-flex self-start mt-5 rounded-full bg-ow-orange px-4 py-2 text-xs font-bold uppercase tracking-wider text-background group-hover:bg-ow-orange-glow transition-colors">
                         Ver bundle →
                       </span>
-                    </a>
+                    </button>
                   </div>
                 </section>
 
@@ -1240,6 +1239,32 @@ export default function PublicoPage() {
 
       {vencedorFinal && celebracaoAte && (
         <ConfettiCelebration winner={vencedorFinal} />
+      )}
+
+      {bundleAberto && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-background/90 backdrop-blur-md p-4 animate-in fade-in duration-200"
+          onClick={() => setBundleAberto(false)}
+        >
+          <div className="relative max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setBundleAberto(false)}
+              className="absolute -top-12 right-0 w-9 h-9 rounded-full bg-surface-2 border border-line font-bold text-fg hover:bg-ow-orange hover:text-background transition-colors"
+              aria-label="Fechar"
+            >
+              ✕
+            </button>
+            <img
+              src={EVENTO.bundleImagem}
+              alt="Bundle de Solo Leveling"
+              className="w-full max-h-[85vh] object-contain rounded-2xl border border-ow-orange/40 shadow-[0_0_60px_rgba(249,158,26,0.25)]"
+            />
+            <p className="text-center text-display text-lg font-bold uppercase tracking-wider text-ow-orange mt-4">
+              Bundle de Solo Leveling
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Modal de Perfil do Jogador */}
