@@ -101,6 +101,14 @@ Posicao,Jogador,Título,Medalha,,,,,,,
 3º Lugar,A definir,3º Colocado,Bronze 🥉,,,,,,,
 `;
 
+const EVENT_FALLBACK_CSV = `
+,Além do Elo,,,,,,,,,,,,
+,Formato especial • Kira contra 20 • Melhor de 3 (MD3),,,,,,,,,,,,
+,,,,,,,,,,,,,
+,Confronto,Jogador A,BattleTag A,Main A,Plataforma A,Placar A,Placar B,Jogador B,BattleTag B,Main B,Plataforma B,Vencedor,Status
+,Jogo 01,Kira,,,-,,,20,,,-,,Pendente
+`;
+
 interface MatchItem {
   id: string;
   fase: string;
@@ -420,7 +428,8 @@ export default function PublicoPage() {
 
   const parseCSV = (csvText: string) => {
     if (!csvText) return;
-    const lines = csvText.split("\n").map(l => l.trim());
+    const source = csvText === FALLBACK_CSV ? EVENT_FALLBACK_CSV : csvText;
+    const lines = source.split("\n").map(l => l.trim());
 
     let parsedRodada1: MatchItem[] = [];
     const parsedRodada2: MatchItem[] = [];
@@ -437,7 +446,7 @@ export default function PublicoPage() {
       const line = lines[i];
       if (!line) continue;
 
-      if (line.includes("Jogador A,BattleTag A,Plataforma A")) {
+      if (line.includes("Jogador A") && line.includes("BattleTag A")) {
         currentSection = "rodada1";
         continue;
       }
@@ -473,21 +482,26 @@ export default function PublicoPage() {
       }
 
       const cols = parseCSVLine(line);
+      while (cols[0] === "") cols.shift();
 
       try {
         if (currentSection === "rodada1" && cols.length >= 9 && cols[0] && cols[0] !== "Jogador A") {
-          const pA = cols[0] || "";
-          const btA = cols[1] || "";
-          const platA = cols[2] || "";
-          const scA = cols[3] || "—";
-          const scB = cols[4] || "—";
-          const pB = cols[5] || "";
-          const btB = cols[6] || "";
-          const platB = cols[7] || "";
-          const venc = cols[8] || "";
+          const planilhaAtual = cols[0].startsWith("Jogo") && cols.length >= 13;
+          const pA = planilhaAtual ? cols[1] || "" : cols[0] || "";
+          const btA = planilhaAtual ? cols[2] || "" : cols[1] || "";
+          const mainA = planilhaAtual ? cols[3] || "" : "";
+          const platA = planilhaAtual ? cols[4] || "" : cols[2] || "";
+          const scA = planilhaAtual ? cols[5] || "—" : cols[3] || "—";
+          const scB = planilhaAtual ? cols[6] || "—" : cols[4] || "—";
+          const pB = planilhaAtual ? cols[7] || "" : cols[5] || "";
+          const btB = planilhaAtual ? cols[8] || "" : cols[6] || "";
+          const mainB = planilhaAtual ? cols[9] || "" : "";
+          const platB = planilhaAtual ? cols[10] || "" : cols[7] || "";
+          const venc = planilhaAtual ? cols[11] || "" : cols[8] || "";
+          if (!pA && !pB) continue;
 
           let hor = "";
-          for (let c = 9; c < cols.length; c++) {
+          for (let c = planilhaAtual ? 13 : 9; c < cols.length; c++) {
             if (cols[c] && cols[c].length > 0) {
               hor = cols[c];
               break;
@@ -499,10 +513,12 @@ export default function PublicoPage() {
             fase: "1ª Rodada",
             timeA: pA,
             battletagA: btA,
+            mainA,
             plataformaA: platA,
             scoreA: scA,
             timeB: pB,
             battletagB: btB,
+            mainB,
             plataformaB: platB,
             scoreB: scB,
             vencedor: venc,
@@ -666,11 +682,7 @@ export default function PublicoPage() {
 
   const rodadasTabs = [
     { id: "rodada1", label: "1ª Rodada", data: rodada1 },
-    { id: "rodada2", label: "2ª Rodada", data: rodada2 },
-    { id: "oitavas", label: "Oitavas", data: oitavas },
-    { id: "quartas", label: "Quartas", data: quartas },
-    { id: "semifinais", label: "Semifinais", data: semifinais },
-    { id: "final", label: "Grande Final", data: grandeFinal },
+    // As demais fases permanecem carregadas para preservar o histórico, mas ficam ocultas neste evento.
   ];
 
   const faseAtualId = determinarFaseAtual(rodadasTabs);
@@ -836,14 +848,14 @@ export default function PublicoPage() {
                 </section>
 
                 {/* CARD 2: Status atual do torneio */}
-                <section className="order-1 flex flex-col justify-center surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 w-full">
+                <section className="hidden order-1 flex flex-col justify-center surface-card rounded-3xl p-6 md:p-8 text-center border border-ow-orange/40 shadow-xl bg-surface-2 w-full">
                   <h3 className="text-display text-xl font-bold uppercase text-ow-orange mb-3 flex items-center justify-center gap-2">
                     <span>⚔️</span> Torneio em andamento · {faseAtual.label}
                   </h3>
                   <p className="text-sm text-fg-muted">Acompanhe as partidas da fase atual no chaveamento abaixo.</p>
                 </section>
 
-                <section className="order-2 flex flex-col justify-center surface-card max-w-3xl w-full mx-auto rounded-3xl p-6 md:p-8 border border-ow-blue/40 shadow-xl bg-surface-2">
+                <section className="hidden order-2 flex flex-col justify-center surface-card max-w-3xl w-full mx-auto rounded-3xl p-6 md:p-8 border border-ow-blue/40 shadow-xl bg-surface-2">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-line pb-4">
                     <div>
                       <p className="text-xs uppercase tracking-[0.2em] text-ow-blue font-bold">Próximo jogo</p>
